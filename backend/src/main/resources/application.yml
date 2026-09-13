@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: machinery-log-api
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/machinery_log_db}
+    username: ${SPRING_DATASOURCE_USERNAME:machinery_log}
+    password: ${SPRING_DATASOURCE_PASSWORD:machinery_log}
+  jpa:
+    hibernate:
+      ddl-auto: ${SPRING_JPA_DDL_AUTO:validate}
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: ${SPRING_FLYWAY_ENABLED:true}
+    validate-on-migrate: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: never
+machinery-log:
+  security:
+    jwt-secret: ${JWT_SECRET:change-me-in-local-only-use-a-strong-256-bit-secret}
+    access-token-minutes: ${JWT_ACCESS_TOKEN_MINUTES:120}
+    refresh-token-days: ${JWT_REFRESH_TOKEN_DAYS:7}
+  cors:
+    allowed-origin: ${FRONTEND_ORIGIN:http://localhost:5173}

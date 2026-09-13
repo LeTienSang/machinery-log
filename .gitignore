@@ -1,0 +1,22 @@
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Java
+backend/target/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
