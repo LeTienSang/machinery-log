@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.Instant;
 
 @Service
 public class CatalogService {
@@ -34,7 +35,7 @@ public class CatalogService {
         entity.setPhoneNumber(dto.phoneNumber()); entity.setAddress(dto.address());
         return customerDto(customers.save(entity));
     }
-    @Transactional public void deleteCustomer(Long id) { customers.delete(findCustomer(id)); }
+    @Transactional public void deleteCustomer(Long id) { if (customers.softDelete(id, Instant.now()) == 0) throw new ResourceNotFoundException("Customer not found: " + id); }
 
     @Transactional(readOnly = true) public PageResponse<EquipmentDto> equipment(String search, Pageable page) {
         return PageResponse.from(equipment.search(blankToNull(search), page).map(this::equipmentDto));
@@ -45,7 +46,7 @@ public class CatalogService {
         entity.setEquipmentName(dto.equipmentName()); entity.setSerialRegistrationNumber(dto.serialRegistrationNumber());
         entity.setEquipmentType(dto.equipmentType()); return equipmentDto(equipment.save(entity));
     }
-    @Transactional public void deleteEquipment(Long id) { equipment.delete(findEquipment(id)); }
+    @Transactional public void deleteEquipment(Long id) { if (equipment.softDelete(id, Instant.now()) == 0) throw new ResourceNotFoundException("Equipment not found: " + id); }
 
     @Transactional(readOnly = true) public PageResponse<ContractDto> contracts(String search, Pageable page) {
         return PageResponse.from(contracts.search(blankToNull(search), page).map(this::contractDto));
@@ -60,7 +61,7 @@ public class CatalogService {
         if (dto.status() != null) entity.setStatus(dto.status());
         return contractDto(contracts.save(entity));
     }
-    @Transactional public void deleteContract(Long id) { contracts.delete(findContract(id)); }
+    @Transactional public void deleteContract(Long id) { if (contracts.softDelete(id, Instant.now()) == 0) throw new ResourceNotFoundException("Contract not found: " + id); }
 
     @Transactional(readOnly = true)
     public java.util.List<PricingAppendixDto> pricingAppendices(Long contractId) {
@@ -90,9 +91,9 @@ public class CatalogService {
 
     @Transactional public void deletePricing(Long id) { pricingAppendices.delete(findPricing(id)); }
 
-    private Customer findCustomer(Long id) { return customers.findById(id).orElseThrow(() -> new ResourceNotFoundException("Customer not found: " + id)); }
-    private Equipment findEquipment(Long id) { return equipment.findById(id).orElseThrow(() -> new ResourceNotFoundException("Equipment not found: " + id)); }
-    private Contract findContract(Long id) { return contracts.findById(id).orElseThrow(() -> new ResourceNotFoundException("Contract not found: " + id)); }
+    private Customer findCustomer(Long id) { Customer value = customers.findByIdAndNotDeleted(id); if (value == null) throw new ResourceNotFoundException("Customer not found: " + id); return value; }
+    private Equipment findEquipment(Long id) { Equipment value = equipment.findByIdAndNotDeleted(id); if (value == null) throw new ResourceNotFoundException("Equipment not found: " + id); return value; }
+    private Contract findContract(Long id) { Contract value = contracts.findByIdAndNotDeleted(id); if (value == null) throw new ResourceNotFoundException("Contract not found: " + id); return value; }
     private PricingAppendix findPricing(Long id) { return pricingAppendices.findById(id).orElseThrow(() -> new ResourceNotFoundException("Pricing appendix not found: " + id)); }
     private CustomerDto customerDto(Customer e) { return new CustomerDto(e.getId(), e.getCompanyName(), e.getTaxCode(), e.getRepresentativeName(), e.getPosition(), e.getPhoneNumber(), e.getAddress()); }
     private EquipmentDto equipmentDto(Equipment e) { return new EquipmentDto(e.getId(), e.getEquipmentName(), e.getSerialRegistrationNumber(), e.getEquipmentType()); }

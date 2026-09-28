@@ -2,6 +2,7 @@ package com.machinerylog.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.Instant;
 
 @Entity
 @Table(name = "contracts")
@@ -13,6 +14,7 @@ public class Contract {
     @Column(name = "project_name") private String projectName;
     @Column(name = "construction_site") private String constructionSite;
     @Enumerated(EnumType.STRING) @Column(nullable = false) private ContractStatus status = ContractStatus.ACTIVE;
+    @Column(name = "deleted_at") private Instant deletedAt;
     public Contract() { }
     public Long getId() { return id; }
     public Long getCustomerId() { return customerId; }
@@ -27,4 +29,6 @@ public class Contract {
     public void setConstructionSite(String value) { constructionSite = value; }
     public ContractStatus getStatus() { return status; }
     public void setStatus(ContractStatus value) { status = value; }
+    public Instant getDeletedAt() { return deletedAt; }
+    public void setDeletedAt(Instant value) { deletedAt = value; }
 }

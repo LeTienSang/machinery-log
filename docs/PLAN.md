@@ -16,11 +16,11 @@
 - [x] **DONE** — JWT access/refresh token, filter bảo mật, CORS và endpoint auth cơ bản.
 - [x] **DONE** — `mvn test` chạy thành công với unit test nền tảng.
 - [x] **DONE** — `npm run build` chạy thành công.
-- [ ] **TODO** — Kiểm thử tích hợp với PostgreSQL/MinIO thực tế và hoàn thiện README hướng dẫn chạy.
+- [ ] **IN PROGRESS** — Kiểm thử tích hợp với PostgreSQL/MinIO thực tế và hoàn thiện README hướng dẫn chạy (README đã có hướng dẫn local; còn integration test).
 
 ## 2. Giai đoạn 0 — Chuẩn bị nền tảng
 
-- [ ] **TODO** — Chốt cấu trúc package theo Controller → Service → Repository → Entity/DTO.
+- [x] **DONE** — Chốt cấu trúc package theo Controller → Service → Repository → Entity/DTO.
 - [ ] **IN PROGRESS** — Chuẩn hóa error response, validation, pagination, timezone và định dạng ngày theo `API_SPEC.md` (đã có error envelope, validation handler, `PageResponse` và UTC; còn cần áp dụng vào các endpoint nghiệp vụ).
 - [x] **DONE** — Hoàn thiện quản lý secret: bỏ giá trị mặc định nguy hiểm và kiểm tra JWT secret/thời hạn khi khởi động.
 - [x] **DONE** — Thiết lập request ID (`X-Request-Id`) và global exception handler; logging/correlation nâng cao vẫn còn ở bước sau.
@@ -49,8 +49,8 @@
 ## 5. Giai đoạn 3 — Danh mục và dữ liệu nghiệp vụ
 
 - [x] **DONE** — CRUD Customers, Equipment, Contracts và Pricing Appendices ở backend nền tảng.
-- [ ] **IN PROGRESS** — Thêm validation, unique constraint, soft delete và phân quyền danh mục (đã có DTO validation, unique mapping và Accountant Admin guard; còn soft delete/ràng buộc nghiệp vụ).
-- [ ] **TODO** — Bổ sung endpoint/API client và các màn hình quản lý danh mục.
+- [ ] **IN PROGRESS** — Thêm validation, unique constraint, soft delete và phân quyền danh mục (đã có DTO validation, unique mapping, V2 soft-delete migration và Accountant Admin guard; còn ràng buộc liên kết/nghiệp vụ).
+- [ ] **IN PROGRESS** — Bổ sung endpoint/API client và các màn hình quản lý danh mục (backend endpoint đã có; còn frontend API client/UI).
 - [x] **DONE** — Kiểm tra mapping entity/DTO với migration V1 ở backend nền tảng; migration bổ sung chưa cần thiết.
 
 ## 6. Giai đoạn 4 — Nghiệm thu, tạm ứng và công nợ
@@ -58,7 +58,7 @@
 - [ ] **IN PROGRESS** — Xây dựng Monthly Acceptance Service và endpoint tạo/xem/chốt nghiệm thu (đã có model, list/detail/sign; tạo bản ghi sẽ nối với export).
 - [ ] **IN PROGRESS** — Implement state machine nghiệm thu, khóa dữ liệu và chống tạo bản ghi trùng (đã có `PENDING_SIGNATURE → SIGNED` và pessimistic lock; còn `NEEDS_RECALCULATION`/unique migration).
 - [ ] **TODO** — Implement Advance Payments và Debt Reconciliation theo công thức trong `DATABASE.md`.
-- [ ] **TODO** — Dùng `BigDecimal` cho toàn bộ phép tính tiền/giờ; dùng transaction và pessimistic lock ở thao tác chốt.
+- [ ] **IN PROGRESS** — Dùng `BigDecimal` cho toàn bộ phép tính tiền/giờ; dùng transaction và pessimistic lock ở thao tác chốt (model đã dùng `BigDecimal`, transaction/lock đã có; còn service calculate và kiểm thử biên).
 - [ ] **TODO** — Khi reopen log, chuyển acceptance sang `NEEDS_RECALCULATION` và vô hiệu hóa export version cũ.
 - [ ] **TODO** — Xây dựng UI nghiệm thu, tạm ứng, công nợ và các trạng thái loading/error/empty.
 - [ ] **TODO** — Test race condition, timeout, số tiền biên và các chuyển trạng thái hợp lệ/không hợp lệ.
