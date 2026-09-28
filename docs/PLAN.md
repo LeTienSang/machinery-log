@@ -1,0 +1,98 @@
+# Kế hoạch triển khai MACHINERY-LOG
+
+> Cập nhật: 2026-09-28
+>
+> Trạng thái được đối chiếu với mã nguồn hiện tại, không đánh dấu `DONE` chỉ dựa
+> trên tài liệu thiết kế. `DONE` nghĩa là đã có bằng chứng trong repository và
+> đã kiểm tra được ở mức phù hợp.
+
+## 1. Hiện trạng đã xác nhận
+
+- [x] **DONE** — Khởi tạo repository với `backend/`, `frontend/`, `docs/` và cấu hình Docker Compose.
+- [x] **DONE** — Backend Spring Boot/Java, Flyway, PostgreSQL và cấu hình môi trường cơ bản.
+- [x] **DONE** — Frontend React + TypeScript + Vite + Tailwind/shadcn nền tảng.
+- [x] **DONE** — Migration V1 tạo schema nghiệp vụ theo thiết kế database.
+- [x] **DONE** — Entity/repository/user role và dữ liệu dev ban đầu.
+- [x] **DONE** — JWT access/refresh token, filter bảo mật, CORS và endpoint auth cơ bản.
+- [x] **DONE** — `mvn test` chạy thành công (hiện chưa có test source backend).
+- [x] **DONE** — `npm run build` chạy thành công.
+- [ ] **TODO** — Kiểm thử tích hợp với PostgreSQL/MinIO thực tế và hoàn thiện README hướng dẫn chạy.
+
+## 2. Giai đoạn 0 — Chuẩn bị nền tảng
+
+- [ ] **TODO** — Chốt cấu trúc package theo Controller → Service → Repository → Entity/DTO.
+- [ ] **TODO** — Chuẩn hóa error response, validation, pagination, timezone và định dạng ngày theo `API_SPEC.md`.
+- [ ] **TODO** — Hoàn thiện quản lý secret: bỏ giá trị mặc định nguy hiểm, kiểm tra biến môi trường khi khởi động.
+- [ ] **TODO** — Thiết lập logging, correlation/request ID và global exception handler.
+- [ ] **TODO** — Bổ sung test framework, test fixtures và CI chạy backend/frontend build + test.
+
+## 3. Giai đoạn 1 — Xác thực và phân quyền
+
+- [x] **DONE** — Đăng nhập, refresh token và tải thông tin user ở mức nền tảng.
+- [ ] **TODO** — Đối chiếu đầy đủ quyền `OPERATOR`, `ACCOUNTANT`, `ADMIN` cho từng endpoint.
+- [ ] **TODO** — Hoàn thiện vòng đời refresh token (lưu/thu hồi/rotation nếu cần) và logout.
+- [ ] **TODO** — Viết unit/integration test cho token hết hạn, token không hợp lệ và truy cập trái quyền.
+- [ ] **TODO** — Xây dựng màn hình login, lưu session an toàn và route guard trên frontend.
+
+## 4. Giai đoạn 2 — OCR và nhật ký hằng ngày
+
+- [ ] **TODO** — Tạo storage service (MinIO/object storage), upload ảnh và kiểm tra loại/kích thước file.
+- [ ] **TODO** — Tích hợp Gemini Flash API với timeout, retry, giới hạn chi phí và xử lý lỗi.
+- [ ] **TODO** — Xây dựng `POST /api/v1/ocr/process-log`, DTO kết quả OCR và trạng thái xử lý.
+- [ ] **TODO** — Xây dựng batch-save, danh sách/chi tiết daily log, approve và reopen theo API spec.
+- [ ] **TODO** — Áp dụng state machine `PENDING → APPROVED/REJECTED → PENDING` khi reopen.
+- [ ] **TODO** — Lưu người thao tác, lý do từ chối, ảnh gốc và dữ liệu OCR có thể chỉnh sửa.
+- [ ] **TODO** — Xây dựng UI Operator: upload/chụp ảnh, xem kết quả OCR, sửa và gửi nhật ký.
+- [ ] **TODO** — Xây dựng UI Accountant: danh sách review, đối chiếu dữ liệu, approve/reject/reopen.
+- [ ] **TODO** — Test luồng đầu-cuối OCR → Review → Approve.
+
+## 5. Giai đoạn 3 — Danh mục và dữ liệu nghiệp vụ
+
+- [ ] **TODO** — CRUD Customers, Equipment, Contracts và Pricing Appendices.
+- [ ] **TODO** — Thêm validation, unique constraint, soft delete và phân quyền danh mục.
+- [ ] **TODO** — Bổ sung endpoint/API client và các màn hình quản lý danh mục.
+- [ ] **TODO** — Kiểm tra mapping entity/DTO với migration V1; tạo migration bổ sung nếu schema thực tế lệch tài liệu.
+
+## 6. Giai đoạn 4 — Nghiệm thu, tạm ứng và công nợ
+
+- [ ] **TODO** — Xây dựng Monthly Acceptance Service và endpoint tạo/xem/chốt nghiệm thu.
+- [ ] **TODO** — Implement state machine nghiệm thu, khóa dữ liệu và chống tạo bản ghi trùng.
+- [ ] **TODO** — Implement Advance Payments và Debt Reconciliation theo công thức trong `DATABASE.md`.
+- [ ] **TODO** — Dùng `BigDecimal` cho toàn bộ phép tính tiền/giờ; dùng transaction và pessimistic lock ở thao tác chốt.
+- [ ] **TODO** — Khi reopen log, chuyển acceptance sang `NEEDS_RECALCULATION` và vô hiệu hóa export version cũ.
+- [ ] **TODO** — Xây dựng UI nghiệm thu, tạm ứng, công nợ và các trạng thái loading/error/empty.
+- [ ] **TODO** — Test race condition, timeout, số tiền biên và các chuyển trạng thái hợp lệ/không hợp lệ.
+
+## 7. Giai đoạn 5 — Export báo cáo Excel
+
+- [ ] **TODO** — Implement `ExcelExportService` bằng Apache POI cho đủ 3 báo cáo v1.
+- [ ] **TODO** — Implement `GET /api/v1/export/report-set`, tham số kỳ báo cáo và quyền Accountant/Admin.
+- [ ] **TODO** — Đảm bảo dữ liệu export lấy từ acceptance đã chốt và có version/audit.
+- [ ] **TODO** — Kiểm thử template, công thức, encoding, định dạng ngày/tiền và trường hợp không có dữ liệu.
+- [ ] **TODO** — Xây dựng UI chọn kỳ, xem trạng thái và tải bộ báo cáo.
+
+## 8. Giai đoạn 6 — Audit, vận hành và chất lượng
+
+- [ ] **TODO** — Ghi `audit_logs` JSONB theo nguyên tắc append-only, không lưu secret/ảnh nhạy cảm ngoài quy định.
+- [ ] **TODO** — Bổ sung health check, migration check, cấu hình production và backup database/object storage.
+- [ ] **TODO** — Thêm test API contract, integration test với PostgreSQL/MinIO mock và frontend component/e2e test.
+- [ ] **TODO** — Kiểm tra accessibility, responsive UI và các feedback state theo `UI-DESIGN.md`.
+- [ ] **TODO** — Chạy checklist trước commit: không debug log/secret, build sạch, cập nhật tài liệu liên quan.
+- [ ] **TODO** — Cập nhật `API_SPEC.md`, `DATABASE.md`, `ARCHITECTURE.md`, `UI-DESIGN.md` sau mỗi thay đổi tương ứng.
+
+## 9. Thứ tự bàn giao đề xuất
+
+1. Hoàn thiện nền tảng lỗi/validation/test và auth frontend.
+2. Hoàn thiện OCR + daily logs để có luồng nghiệp vụ tối thiểu chạy được.
+3. Hoàn thiện danh mục làm dữ liệu đầu vào ổn định.
+4. Implement nghiệm thu → công nợ → export theo đúng dependency dữ liệu.
+5. Bổ sung audit, hardening, test end-to-end và tài liệu triển khai.
+
+## 10. Tiêu chí hoàn thành v1
+
+- [ ] **TODO** — Operator upload ảnh và nhận dữ liệu OCR có thể chỉnh sửa.
+- [ ] **TODO** — Accountant review, approve/reject/reopen được nhật ký theo đúng quyền.
+- [ ] **TODO** — Hệ thống tính nghiệm thu, tạm ứng, công nợ đúng công thức và chịu được cập nhật đồng thời.
+- [ ] **TODO** — Tải được đủ 3 báo cáo Excel từ dữ liệu đã chốt.
+- [ ] **TODO** — Có audit trail, test cho happy path và các lỗi chính, build/CI xanh.
+- [ ] **TODO** — Tài liệu API, database, kiến trúc và UI khớp với code thực tế.
