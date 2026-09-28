@@ -33,6 +33,9 @@ public class AuthService {
             throw new IllegalArgumentException("Invalid refresh token");
         }
         User user = users.findByUsername(jwtService.extractUsername(request.refreshToken())).orElseThrow();
+        if (!jwtService.isValid(request.refreshToken(), user)) {
+            throw new IllegalArgumentException("Invalid refresh token");
+        }
         return response(user);
     }
 

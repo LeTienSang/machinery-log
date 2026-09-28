@@ -44,6 +44,13 @@ Dùng bảng dưới để xác định **thứ tự file cần đọc** tương
 
 **Nguyên tắc vàng:** Nếu 1 tác vụ động chạm tới nhiều tài liệu (VD: thêm tính năng mới vừa đổi DB vừa đổi API vừa đổi UI), AI phải đọc **đủ tất cả** file liên quan trước khi bắt đầu code, không chỉ đọc 1 file rồi suy đoán phần còn lại.
 
+### Quy tắc commit
+
+- AI không tự động tạo commit.
+- Khi thay đổi đã đạt một mốc hợp lý để commit, AI phải báo cho người dùng.
+- Thông báo phải nêu rõ phạm vi thay đổi, kết quả kiểm tra và đề xuất commit message.
+- Chỉ thực hiện `git commit` sau khi người dùng xác nhận rõ ràng.
+
 ---
 
 ## 4. Nguyên tắc cập nhật tài liệu (Documentation Sync Rule)

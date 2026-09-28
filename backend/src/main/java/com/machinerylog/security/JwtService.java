@@ -24,6 +24,12 @@ public class JwtService {
         @Value("${machinery-log.security.access-token-minutes}") long accessTokenMinutes,
         @Value("${machinery-log.security.refresh-token-days}") long refreshTokenDays
     ) {
+        if (secret == null || secret.isBlank() || secret.startsWith("change-me") || secret.length() < 32) {
+            throw new IllegalArgumentException("JWT_SECRET must be a non-default secret of at least 32 characters");
+        }
+        if (accessTokenMinutes <= 0 || refreshTokenDays <= 0) {
+            throw new IllegalArgumentException("JWT token durations must be positive");
+        }
         this.signingKey = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(encodeSecret(secret)));
         this.accessTokenMinutes = accessTokenMinutes;
         this.refreshTokenDays = refreshTokenDays;

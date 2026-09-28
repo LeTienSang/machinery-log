@@ -14,17 +14,17 @@
 - [x] **DONE** — Migration V1 tạo schema nghiệp vụ theo thiết kế database.
 - [x] **DONE** — Entity/repository/user role và dữ liệu dev ban đầu.
 - [x] **DONE** — JWT access/refresh token, filter bảo mật, CORS và endpoint auth cơ bản.
-- [x] **DONE** — `mvn test` chạy thành công (hiện chưa có test source backend).
+- [x] **DONE** — `mvn test` chạy thành công với unit test nền tảng.
 - [x] **DONE** — `npm run build` chạy thành công.
 - [ ] **TODO** — Kiểm thử tích hợp với PostgreSQL/MinIO thực tế và hoàn thiện README hướng dẫn chạy.
 
 ## 2. Giai đoạn 0 — Chuẩn bị nền tảng
 
 - [ ] **TODO** — Chốt cấu trúc package theo Controller → Service → Repository → Entity/DTO.
-- [ ] **TODO** — Chuẩn hóa error response, validation, pagination, timezone và định dạng ngày theo `API_SPEC.md`.
-- [ ] **TODO** — Hoàn thiện quản lý secret: bỏ giá trị mặc định nguy hiểm, kiểm tra biến môi trường khi khởi động.
-- [ ] **TODO** — Thiết lập logging, correlation/request ID và global exception handler.
-- [ ] **TODO** — Bổ sung test framework, test fixtures và CI chạy backend/frontend build + test.
+- [ ] **IN PROGRESS** — Chuẩn hóa error response, validation, pagination, timezone và định dạng ngày theo `API_SPEC.md` (đã có error envelope, validation handler, `PageResponse` và UTC; còn cần áp dụng vào các endpoint nghiệp vụ).
+- [x] **DONE** — Hoàn thiện quản lý secret: bỏ giá trị mặc định nguy hiểm và kiểm tra JWT secret/thời hạn khi khởi động.
+- [x] **DONE** — Thiết lập request ID (`X-Request-Id`) và global exception handler; logging/correlation nâng cao vẫn còn ở bước sau.
+- [ ] **IN PROGRESS** — Bổ sung test framework, test fixtures và CI chạy backend/frontend build + test (đã có unit test nền tảng và workflow CI; còn thiếu fixture/integration test).
 
 ## 3. Giai đoạn 1 — Xác thực và phân quyền
 
@@ -32,19 +32,19 @@
 - [ ] **TODO** — Đối chiếu đầy đủ quyền `OPERATOR`, `ACCOUNTANT`, `ADMIN` cho từng endpoint.
 - [ ] **TODO** — Hoàn thiện vòng đời refresh token (lưu/thu hồi/rotation nếu cần) và logout.
 - [ ] **TODO** — Viết unit/integration test cho token hết hạn, token không hợp lệ và truy cập trái quyền.
-- [ ] **TODO** — Xây dựng màn hình login, lưu session an toàn và route guard trên frontend.
+- [x] **DONE** — Xây dựng màn hình login, lưu session trong `sessionStorage` và route guard trên frontend.
 
 ## 4. Giai đoạn 2 — OCR và nhật ký hằng ngày
 
-- [ ] **TODO** — Tạo storage service (MinIO/object storage), upload ảnh và kiểm tra loại/kích thước file.
-- [ ] **TODO** — Tích hợp Gemini Flash API với timeout, retry, giới hạn chi phí và xử lý lỗi.
-- [ ] **TODO** — Xây dựng `POST /api/v1/ocr/process-log`, DTO kết quả OCR và trạng thái xử lý.
-- [ ] **TODO** — Xây dựng batch-save, danh sách/chi tiết daily log, approve và reopen theo API spec.
-- [ ] **TODO** — Áp dụng state machine `PENDING → APPROVED/REJECTED → PENDING` khi reopen.
-- [ ] **TODO** — Lưu người thao tác, lý do từ chối, ảnh gốc và dữ liệu OCR có thể chỉnh sửa.
+- [x] **DONE** — Tạo storage service (MinIO/object storage), upload ảnh và kiểm tra loại/kích thước file.
+- [ ] **IN PROGRESS** — Tích hợp Gemini Flash API với timeout, retry, giới hạn chi phí và xử lý lỗi (đã có client, timeout 30s và error mapping; còn retry/cost guard).
+- [x] **DONE** — Xây dựng `POST /api/v1/ocr/process-log`, DTO kết quả OCR và trạng thái xử lý.
+- [x] **DONE** — Xây dựng batch-save, danh sách/chi tiết daily log, approve và reopen theo API spec ở backend nền tảng.
+- [x] **DONE** — Áp dụng state machine `PENDING → APPROVED/REJECTED → PENDING` khi reopen.
+- [x] **DONE** — Lưu reviewer, lý do từ chối/reopen, ảnh gốc và dữ liệu OCR có thể chỉnh sửa.
 - [ ] **TODO** — Xây dựng UI Operator: upload/chụp ảnh, xem kết quả OCR, sửa và gửi nhật ký.
-- [ ] **TODO** — Xây dựng UI Accountant: danh sách review, đối chiếu dữ liệu, approve/reject/reopen.
-- [ ] **TODO** — Test luồng đầu-cuối OCR → Review → Approve.
+- [x] **DONE** — Xây dựng UI Accountant nền tảng: danh sách review, approve/reject/reopen và feedback loading/error/empty.
+- [ ] **IN PROGRESS** — Test luồng đầu-cuối OCR → Review → Approve (đã có unit test validation upload và state machine review; còn thiếu integration test với MinIO/Gemini).
 
 ## 5. Giai đoạn 3 — Danh mục và dữ liệu nghiệp vụ
 

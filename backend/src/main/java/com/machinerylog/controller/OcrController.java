@@ -1,0 +1,35 @@
+package com.machinerylog.controller;
+
+import com.machinerylog.dto.DailyLogDto;
+import com.machinerylog.entity.User;
+import com.machinerylog.service.OcrService;
+import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+@RestController
+@RequestMapping("/api/v1/ocr")
+public class OcrController {
+    private final OcrService ocr;
+
+    public OcrController(OcrService ocr) { this.ocr = ocr; }
+
+    @PostMapping(value = "/process-log", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('OPERATOR', 'ACCOUNTANT_ADMIN')")
+    public ResponseEntity<DailyLogDto> process(
+        @RequestPart("file") MultipartFile file,
+        @RequestParam @NotNull Long contractId,
+        @RequestParam @NotNull Long equipmentId,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate workDate,
+        @RequestParam(required = false) Long operatorId,
+        @AuthenticationPrincipal User actor
+    ) {
+        return ResponseEntity.ok(ocr.process(file, contractId, equipmentId, workDate, operatorId, actor));
+    }
+}
