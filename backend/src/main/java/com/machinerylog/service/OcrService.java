@@ -16,16 +16,18 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class OcrService {
-    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
+    private final long maxFileSize;
     private static final Set<String> CONTENT_TYPES = Set.of("image/jpeg", "image/png", "image/heic");
     private final FileStorage storage;
     private final OcrClient ocrClient;
     private final DailyLogService dailyLogs;
 
-    public OcrService(FileStorage storage, OcrClient ocrClient, DailyLogService dailyLogs) {
+    public OcrService(FileStorage storage, OcrClient ocrClient, DailyLogService dailyLogs,
+                      @org.springframework.beans.factory.annotation.Value("${machinery-log.ocr.max-image-bytes:10485760}") long maxFileSize) {
         this.storage = storage;
         this.ocrClient = ocrClient;
         this.dailyLogs = dailyLogs;
+        this.maxFileSize = maxFileSize;
     }
 
     public DailyLogDto process(MultipartFile file, Long contractId, Long equipmentId,
@@ -47,7 +49,7 @@ public class OcrService {
 
     private void validate(MultipartFile file) {
         String contentType = file.getContentType() == null ? "" : file.getContentType().toLowerCase(Locale.ROOT);
-        if (file.isEmpty() || file.getSize() > MAX_FILE_SIZE) throw new OcrInputException("FILE_TOO_LARGE");
+        if (file.isEmpty() || file.getSize() > maxFileSize) throw new OcrInputException("FILE_TOO_LARGE");
         if (!CONTENT_TYPES.contains(contentType)) throw new OcrInputException("INVALID_FILE_TYPE");
     }
 

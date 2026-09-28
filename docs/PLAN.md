@@ -37,7 +37,7 @@
 ## 4. Giai đoạn 2 — OCR và nhật ký hằng ngày
 
 - [x] **DONE** — Tạo storage service (MinIO/object storage), upload ảnh và kiểm tra loại/kích thước file.
-- [ ] **IN PROGRESS** — Tích hợp Gemini Flash API với timeout, retry, giới hạn chi phí và xử lý lỗi (đã có client, timeout 30s và error mapping; còn retry/cost guard).
+- [ ] **IN PROGRESS** — Tích hợp Gemini Flash API với timeout, retry, giới hạn chi phí và xử lý lỗi (đã có client, timeout 30s, retry tối đa 2 lần, giới hạn ảnh cấu hình được và error mapping; còn integration test với MinIO/Gemini).
 - [x] **DONE** — Xây dựng `POST /api/v1/ocr/process-log`, DTO kết quả OCR và trạng thái xử lý.
 - [x] **DONE** — Xây dựng batch-save, danh sách/chi tiết daily log, approve và reopen theo API spec ở backend nền tảng.
 - [x] **DONE** — Áp dụng state machine `PENDING → APPROVED/REJECTED → PENDING` khi reopen.
@@ -48,15 +48,15 @@
 
 ## 5. Giai đoạn 3 — Danh mục và dữ liệu nghiệp vụ
 
-- [ ] **TODO** — CRUD Customers, Equipment, Contracts và Pricing Appendices.
-- [ ] **TODO** — Thêm validation, unique constraint, soft delete và phân quyền danh mục.
+- [x] **DONE** — CRUD Customers, Equipment, Contracts và Pricing Appendices ở backend nền tảng.
+- [ ] **IN PROGRESS** — Thêm validation, unique constraint, soft delete và phân quyền danh mục (đã có DTO validation, unique mapping và Accountant Admin guard; còn soft delete/ràng buộc nghiệp vụ).
 - [ ] **TODO** — Bổ sung endpoint/API client và các màn hình quản lý danh mục.
-- [ ] **TODO** — Kiểm tra mapping entity/DTO với migration V1; tạo migration bổ sung nếu schema thực tế lệch tài liệu.
+- [x] **DONE** — Kiểm tra mapping entity/DTO với migration V1 ở backend nền tảng; migration bổ sung chưa cần thiết.
 
 ## 6. Giai đoạn 4 — Nghiệm thu, tạm ứng và công nợ
 
-- [ ] **TODO** — Xây dựng Monthly Acceptance Service và endpoint tạo/xem/chốt nghiệm thu.
-- [ ] **TODO** — Implement state machine nghiệm thu, khóa dữ liệu và chống tạo bản ghi trùng.
+- [ ] **IN PROGRESS** — Xây dựng Monthly Acceptance Service và endpoint tạo/xem/chốt nghiệm thu (đã có model, list/detail/sign; tạo bản ghi sẽ nối với export).
+- [ ] **IN PROGRESS** — Implement state machine nghiệm thu, khóa dữ liệu và chống tạo bản ghi trùng (đã có `PENDING_SIGNATURE → SIGNED` và pessimistic lock; còn `NEEDS_RECALCULATION`/unique migration).
 - [ ] **TODO** — Implement Advance Payments và Debt Reconciliation theo công thức trong `DATABASE.md`.
 - [ ] **TODO** — Dùng `BigDecimal` cho toàn bộ phép tính tiền/giờ; dùng transaction và pessimistic lock ở thao tác chốt.
 - [ ] **TODO** — Khi reopen log, chuyển acceptance sang `NEEDS_RECALCULATION` và vô hiệu hóa export version cũ.

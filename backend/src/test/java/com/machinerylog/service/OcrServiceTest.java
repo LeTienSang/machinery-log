@@ -21,7 +21,7 @@ class OcrServiceTest {
     void setUp() {
         storage = mock(FileStorage.class);
         ocrClient = mock(OcrClient.class);
-        service = new OcrService(storage, ocrClient, mock(DailyLogService.class));
+        service = new OcrService(storage, ocrClient, mock(DailyLogService.class), 10 * 1024 * 1024);
     }
 
     @Test

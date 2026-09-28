@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 
 @Service
@@ -18,16 +19,19 @@ public class GeminiOcrClient implements OcrClient {
     private final RestClient client;
     private final ObjectMapper mapper;
     private final String apiKey;
+    private final int maxAttempts;
 
     public GeminiOcrClient(ObjectMapper mapper,
                            @Value("${machinery-log.ocr.api-key:}") String apiKey,
-                           @Value("${machinery-log.ocr.endpoint:https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent}") String endpoint) {
+                           @Value("${machinery-log.ocr.endpoint:https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent}") String endpoint,
+                           @Value("${machinery-log.ocr.max-attempts:2}") int maxAttempts) {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout(30_000);
         requestFactory.setReadTimeout(30_000);
         this.client = RestClient.builder().baseUrl(endpoint).requestFactory(requestFactory).build();
         this.mapper = mapper;
         this.apiKey = apiKey;
+        this.maxAttempts = Math.max(1, Math.min(maxAttempts, 2));
     }
 
     @Override
@@ -45,8 +49,7 @@ public class GeminiOcrClient implements OcrClient {
                 Map.of("text", prompt), Map.of("inline_data", Map.of("mime_type", contentType,
                     "data", Base64.getEncoder().encodeToString(bytes)))
             })});
-            String raw = client.post().uri(uriBuilder -> uriBuilder.queryParam("key", apiKey).build())
-                .contentType(MediaType.APPLICATION_JSON).body(body).retrieve().body(String.class);
+            String raw = requestWithRetry(body);
             JsonNode root = mapper.readTree(raw);
             String text = root.at("/candidates/0/content/parts/0/text").asText();
             text = text.replaceFirst("^```json\\s*", "").replaceFirst("\\s*```$", "").trim();
@@ -57,5 +60,23 @@ public class GeminiOcrClient implements OcrClient {
         } catch (Exception exception) {
             throw new OcrException("Gemini response could not be parsed", false, exception);
         }
+    }
+
+    private String requestWithRetry(Map<String, Object> body) {
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                return client.post().uri(uriBuilder -> uriBuilder.queryParam("key", apiKey).build())
+                    .contentType(MediaType.APPLICATION_JSON).body(body).retrieve().body(String.class);
+            } catch (ResourceAccessException | RestClientResponseException exception) {
+                boolean retryable = exception instanceof ResourceAccessException
+                    || ((RestClientResponseException) exception).getStatusCode().is5xxServerError();
+                if (!retryable || attempt == maxAttempts) {
+                    boolean timeout = exception instanceof ResourceAccessException
+                        && exception.getCause() instanceof SocketTimeoutException;
+                    throw new OcrException("Gemini API request failed", timeout, exception);
+                }
+            }
+        }
+        throw new OcrException("Gemini API request failed", false, null);
     }
 }
