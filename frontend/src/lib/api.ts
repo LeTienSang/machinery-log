@@ -76,6 +76,21 @@ export async function reopenDailyLog(id: number, reopenReason: string) {
   return data
 }
 
+export async function processOcrLog(file: File, contractId: number, equipmentId: number, workDate: string) {
+  const form = new FormData()
+  form.append('file', file)
+  form.append('contractId', String(contractId))
+  form.append('equipmentId', String(equipmentId))
+  form.append('workDate', workDate)
+  const { data } = await api.post<DailyLog>('/ocr/process-log', form)
+  return data
+}
+
+export async function saveDailyLog(log: DailyLog) {
+  const { data } = await api.post<DailyLog[]>('/daily-logs/batch-save', [log])
+  return data[0]
+}
+
 api.interceptors.request.use((config) => {
   const token = sessionStorage.getItem('machinery-log.access-token')
   if (token) config.headers.Authorization = `Bearer ${token}`

@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react'
 import { ClipboardCheck, FileSpreadsheet, LayoutDashboard, LogIn, Upload, Wrench } from 'lucide-react'
 import axios from 'axios'
-import { approveDailyLog, clearSession, DailyLog, getDailyLogs, login, reopenDailyLog } from './lib/api'
+import { approveDailyLog, clearSession, DailyLog, getDailyLogs, login, processOcrLog, reopenDailyLog, saveDailyLog } from './lib/api'
 
 const navigation = [
   { label: 'Tổng quan', icon: LayoutDashboard },
@@ -12,9 +12,10 @@ const navigation = [
 ]
 
 function Dashboard() {
-  const [view, setView] = useState<'overview' | 'logs'>('overview')
+  const [view, setView] = useState<'overview' | 'logs' | 'upload'>('overview')
 
   if (view === 'logs') return <DailyLogsPage onBack={() => setView('overview')} />
+  if (view === 'upload') return <UploadLogPage onBack={() => setView('overview')} />
 
   return (
     <div className="app-shell">
@@ -22,7 +23,7 @@ function Dashboard() {
         <div className="brand-mark"><span>ML</span><div><strong>MACHINERY</strong><small>Digital logbook</small></div></div>
         <nav aria-label="Điều hướng chính">
           {navigation.map(({ label, icon: Icon }, index) => (
-            <button className={`nav-item ${index === 0 ? 'active' : ''}`} key={label} type="button" onClick={() => index === 2 && setView('logs')}>
+            <button className={`nav-item ${index === 0 ? 'active' : ''}`} key={label} type="button" onClick={() => index === 1 ? setView('upload') : index === 2 ? setView('logs') : index === 0 ? setView('overview') : undefined}>
               <Icon size={18} strokeWidth={1.8} />
               {label}
             </button>
@@ -35,6 +36,74 @@ function Dashboard() {
         <section className="welcome-panel"><div><p className="eyebrow accent">WORKSPACE STATUS</p><h2>Nền tảng đã sẵn sàng cho phiên làm việc đầu tiên.</h2><p>Kết nối dữ liệu nhật ký, quy trình duyệt và báo cáo trong một không gian tập trung.</p></div><div className="signal"><span className="signal-ring" /><strong>01</strong><small>workspace</small></div></section>
         <section className="metric-grid" aria-label="Tổng quan hệ thống"><article><span className="metric-label">Log chờ duyệt</span><strong>--</strong><small>Chưa kết nối dữ liệu</small></article><article><span className="metric-label">Giờ vận hành tháng này</span><strong>--</strong><small>Đang chờ kỳ billing</small></article><article><span className="metric-label">Báo cáo đã xuất</span><strong>--</strong><small>Chưa có bản ghi</small></article></section>
         <section className="setup-grid"><article className="setup-card"><div className="card-heading"><span className="step-index">01</span><div><h3>Khởi tạo backend</h3><p>Spring Boot API và lớp xác thực JWT.</p></div></div><span className="tag">IN PROGRESS</span></article><article className="setup-card"><div className="card-heading"><span className="step-index">02</span><div><h3>Chuẩn bị cơ sở dữ liệu</h3><p>PostgreSQL, migrations và audit trail.</p></div></div><span className="tag muted">NEXT</span></article></section>
+      </main>
+    </div>
+  )
+}
+
+function UploadLogPage({ onBack }: { onBack: () => void }) {
+  const [file, setFile] = useState<File | null>(null)
+  const [contractId, setContractId] = useState('')
+  const [equipmentId, setEquipmentId] = useState('')
+  const [workDate, setWorkDate] = useState(new Date().toISOString().slice(0, 10))
+  const [draft, setDraft] = useState<DailyLog | null>(null)
+  const [isBusy, setIsBusy] = useState(false)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+
+  async function handleOcr(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!file) return setError('Chọn ảnh nhật ký trước khi xử lý.')
+    setIsBusy(true)
+    setError('')
+    setMessage('Đang tải ảnh và đọc dữ liệu OCR...')
+    try {
+      const result = await processOcrLog(file, Number(contractId), Number(equipmentId), workDate)
+      setDraft(result)
+      setMessage('OCR hoàn tất. Kiểm tra và chỉnh sửa dữ liệu trước khi gửi.')
+    } catch {
+      setError('Không thể xử lý ảnh nhật ký. Kiểm tra file và kết nối máy chủ.')
+      setMessage('')
+    } finally {
+      setIsBusy(false)
+    }
+  }
+
+  async function handleSave() {
+    if (!draft) return
+    setIsBusy(true)
+    setError('')
+    try {
+      const saved = await saveDailyLog(draft)
+      setDraft(saved)
+      setMessage('Đã gửi nhật ký vào hàng đợi chờ duyệt.')
+    } catch {
+      setError('Không thể lưu nhật ký đã chỉnh sửa.')
+    } finally {
+      setIsBusy(false)
+    }
+  }
+
+  function updateDraft(field: keyof DailyLog, value: string) {
+    setDraft((current) => current ? { ...current, [field]: field === 'operatingHours' || field === 'standbyHours' ? Number(value) : value } : current)
+  }
+
+  return (
+    <div className="app-shell">
+      <aside className="sidebar"><div className="brand-mark"><span>ML</span><div><strong>MACHINERY</strong><small>Digital logbook</small></div></div><button className="nav-item active" type="button" onClick={onBack}><LayoutDashboard size={18} /> Tổng quan</button><div className="sidebar-footer"><span className="status-dot" /> Hệ thống sẵn sàng</div></aside>
+      <main className="main-content">
+        <header className="topbar"><div><p className="eyebrow">OPERATIONS / CAPTURE</p><h1>Upload nhật ký</h1></div><button className="text-button" type="button" onClick={onBack}>Quay lại tổng quan</button></header>
+        <section className="upload-grid">
+          <form className="upload-panel" onSubmit={handleOcr}>
+            <div className="card-heading"><span className="step-index">01</span><div><h3>Đọc ảnh nhật ký</h3><p>Chụp rõ toàn bộ trang, sau đó kiểm tra dữ liệu OCR.</p></div></div>
+            <label htmlFor="log-file">Ảnh nhật ký</label><input id="log-file" type="file" accept="image/jpeg,image/png,image/heic" capture="environment" onChange={(event) => setFile(event.target.files?.[0] ?? null)} required />
+            <div className="form-row"><div><label htmlFor="contract-id">Mã hợp đồng</label><input id="contract-id" type="number" min="1" value={contractId} onChange={(event) => setContractId(event.target.value)} required /></div><div><label htmlFor="equipment-id">Mã thiết bị</label><input id="equipment-id" type="number" min="1" value={equipmentId} onChange={(event) => setEquipmentId(event.target.value)} required /></div></div>
+            <label htmlFor="work-date">Ngày vận hành</label><input id="work-date" type="date" value={workDate} onChange={(event) => setWorkDate(event.target.value)} required />
+            {error && <p className="form-error" role="alert">{error}</p>}{message && <p className="form-message" role="status">{message}</p>}
+            <button className="login-button" type="submit" disabled={isBusy}>{isBusy ? 'Đang xử lý...' : 'Đọc dữ liệu từ ảnh'}</button>
+          </form>
+          <section className="upload-panel" aria-live="polite"><div className="card-heading"><span className="step-index">02</span><div><h3>Kiểm tra và gửi</h3><p>Dữ liệu OCR luôn có thể chỉnh sửa trước khi gửi.</p></div></div>{!draft ? <div className="empty-state">Kết quả OCR sẽ hiển thị tại đây.</div> : <div className="draft-form"><label htmlFor="draft-hours">Giờ vận hành</label><input id="draft-hours" type="number" min="0" step="0.01" value={draft.operatingHours} onChange={(event) => updateDraft('operatingHours', event.target.value)} /><label htmlFor="draft-standby">Giờ chờ</label><input id="draft-standby" type="number" min="0" step="0.01" value={draft.standbyHours} onChange={(event) => updateDraft('standbyHours', event.target.value)} /><label htmlFor="draft-description">Mô tả công việc</label><textarea id="draft-description" value={draft.workDescription ?? ''} onChange={(event) => updateDraft('workDescription', event.target.value)} rows={5} /><button className="login-button" type="button" disabled={isBusy} onClick={() => void handleSave()}>Gửi nhật ký chờ duyệt</button></div>}</section>
+        </section>
       </main>
     </div>
   )

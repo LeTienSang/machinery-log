@@ -42,7 +42,7 @@
 - [x] **DONE** — Xây dựng batch-save, danh sách/chi tiết daily log, approve và reopen theo API spec ở backend nền tảng.
 - [x] **DONE** — Áp dụng state machine `PENDING → APPROVED/REJECTED → PENDING` khi reopen.
 - [x] **DONE** — Lưu reviewer, lý do từ chối/reopen, ảnh gốc và dữ liệu OCR có thể chỉnh sửa.
-- [ ] **TODO** — Xây dựng UI Operator: upload/chụp ảnh, xem kết quả OCR, sửa và gửi nhật ký.
+- [x] **DONE** — Xây dựng UI Operator: upload/chụp ảnh, xem kết quả OCR, sửa và gửi nhật ký.
 - [x] **DONE** — Xây dựng UI Accountant nền tảng: danh sách review, approve/reject/reopen và feedback loading/error/empty.
 - [ ] **IN PROGRESS** — Test luồng đầu-cuối OCR → Review → Approve (đã có unit test validation upload và state machine review; còn thiếu integration test với MinIO/Gemini).
 
