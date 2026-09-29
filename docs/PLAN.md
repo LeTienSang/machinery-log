@@ -10,6 +10,11 @@
 
 ## 0. Gần đây nhất (2026-09-29)
 
+- [x] **DONE** — Bổ sung health check endpoint `/api/v1/health`.
+  - Backend: `HealthController`, `HealthService`, `HealthCheckResult`, `HealthStatus`.
+  - Backend: check database connectivity, trả 200 khi OK, 503 khi fail.
+  - Frontend: `getHealth()` API client, `HealthCheckResult` type.
+  - Test: `HealthControllerTest` integration test.
 - [x] **DONE** — Fix auth flow: missing `/me` endpoint, envelope mismatch, stale state logout.
   - Backend: thêm `GET /api/v1/auth/me` trả `UserDto` (id, username, displayName, role, isActive).
   - Backend: `AuthService.me()` đọc user từ Spring Security context.
