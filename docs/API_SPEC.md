@@ -360,6 +360,7 @@ Xuất bộ 3 báo cáo Excel (Bảng tổng hợp giờ làm, Biên bản bàn 
 | GET/POST/PUT/DELETE | `/api/v1/contracts/{contractId}/pricing-appendices[...]` | Danh mục |
 | GET | `/api/v1/monthly-acceptances` | Nghiệm thu |
 | PUT | `/api/v1/monthly-acceptances/{id}/sign` | Nghiệm thu |
+| GET | `/api/v1/export/report-set` | Export |
 | GET | `/api/v1/audit-logs` | Audit |
 | GET/POST/DELETE | `/api/v1/contracts/{contractId}/advance-payments[...]` | Công nợ |
 | GET/POST/PUT | `/api/v1/contracts/{contractId}/debt-reconciliations[...]` | Công nợ |

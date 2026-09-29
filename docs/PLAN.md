@@ -65,9 +65,9 @@
 
 ## 7. Giai đoạn 5 — Export báo cáo Excel
 
-- [ ] **TODO** — Implement `ExcelExportService` bằng Apache POI cho đủ 3 báo cáo v1.
-- [ ] **TODO** — Implement `GET /api/v1/export/report-set`, tham số kỳ báo cáo và quyền Accountant/Admin.
-- [ ] **TODO** — Đảm bảo dữ liệu export lấy từ acceptance đã chốt và có version/audit.
+- [ ] **IN PROGRESS** — Implement `ExcelExportService` bằng Apache POI cho đủ 3 báo cáo v1 (đã có 3 workbook cơ bản và ZIP; còn hoàn thiện template/định dạng nghiệp vụ).
+- [x] **DONE** — Implement `GET /api/v1/export/report-set`, tham số kỳ báo cáo và quyền Accountant/Admin.
+- [ ] **IN PROGRESS** — Đảm bảo dữ liệu export lấy từ acceptance đã chốt và có version/audit (đã cập nhật `lastExportedAt` và xử lý acceptance cần tính lại; còn audit log và kiểm soát SIGNED/export).
 - [ ] **TODO** — Kiểm thử template, công thức, encoding, định dạng ngày/tiền và trường hợp không có dữ liệu.
 - [ ] **TODO** — Xây dựng UI chọn kỳ, xem trạng thái và tải bộ báo cáo.
 
