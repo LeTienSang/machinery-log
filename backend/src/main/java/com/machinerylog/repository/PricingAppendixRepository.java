@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PricingAppendixRepository extends JpaRepository<PricingAppendix, Long> {
     List<PricingAppendix> findByContractIdOrderByEquipmentIdAscPricingTypeAsc(Long contractId);
+    List<PricingAppendix> findByContractIdAndEquipmentIdOrderByPricingTypeAsc(Long contractId, Long equipmentId);
 }

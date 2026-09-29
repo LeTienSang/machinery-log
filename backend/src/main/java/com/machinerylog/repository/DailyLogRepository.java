@@ -2,6 +2,7 @@ package com.machinerylog.repository;
 
 import com.machinerylog.entity.DailyLog;
 import java.time.LocalDate;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,4 +23,16 @@ public interface DailyLogRepository extends JpaRepository<DailyLog, Long> {
                           @Param("fromDate") LocalDate fromDate,
                           @Param("toDate") LocalDate toDate,
                           Pageable pageable);
+
+    @Query("""
+        select log from DailyLog log
+        where log.contractId = :contractId
+          and log.workDate >= :fromDate
+          and log.workDate < :toDate
+          and log.approvalStatus = com.machinerylog.entity.ApprovalStatus.APPROVED
+        order by log.equipmentId asc, log.workDate asc, log.id asc
+        """)
+    List<DailyLog> findApprovedByContractIdBetweenDateRange(@Param("contractId") Long contractId,
+                                                            @Param("fromDate") LocalDate fromDate,
+                                                            @Param("toDate") LocalDate toDate);
 }

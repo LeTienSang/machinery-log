@@ -1,6 +1,6 @@
 # Kế hoạch triển khai MACHINERY-LOG
 
-> Cập nhật: 2026-09-28
+> Cập nhật: 2026-09-29
 >
 > Trạng thái được đối chiếu với mã nguồn hiện tại, không đánh dấu `DONE` chỉ dựa
 > trên tài liệu thiết kế. `DONE` nghĩa là đã có bằng chứng trong repository và
@@ -55,13 +55,13 @@
 
 ## 6. Giai đoạn 4 — Nghiệm thu, tạm ứng và công nợ
 
-- [ ] **IN PROGRESS** — Xây dựng Monthly Acceptance Service và endpoint tạo/xem/chốt nghiệm thu (đã có model, list/detail/sign; tạo bản ghi sẽ nối với export).
-- [ ] **IN PROGRESS** — Implement state machine nghiệm thu, khóa dữ liệu và chống tạo bản ghi trùng (đã có `PENDING_SIGNATURE → SIGNED` và pessimistic lock; còn `NEEDS_RECALCULATION`/unique migration).
-- [ ] **TODO** — Implement Advance Payments và Debt Reconciliation theo công thức trong `DATABASE.md`.
-- [ ] **IN PROGRESS** — Dùng `BigDecimal` cho toàn bộ phép tính tiền/giờ; dùng transaction và pessimistic lock ở thao tác chốt (model đã dùng `BigDecimal`, transaction/lock đã có; còn service calculate và kiểm thử biên).
+- [x] **DONE** — Xây dựng Monthly Acceptance Service và endpoint xem/chốt nghiệm thu; đã bổ sung tính lại từ `daily_logs` APPROVED theo từng máy và tháng.
+- [x] **DONE** — Implement state machine nghiệm thu, khóa dữ liệu và chống tạo bản ghi trùng (đã có `PENDING_SIGNATURE → SIGNED`, pessimistic lock và unique constraint; logic tính lại gắn với approved logs).
+- [x] **DONE** — Implement Advance Payments và Debt Reconciliation theo công thức trong `DATABASE.md`; đã có CRUD tạm ứng, tạo/lịch sử/chốt đối chiếu và tính `previous + acceptance - paid` theo tháng.
+- [x] **DONE** — Dùng `BigDecimal` cho toàn bộ phép tính tiền/giờ; đã có service calculate với rounding `HALF_UP` và test regression cho số liệu.
 - [ ] **TODO** — Khi reopen log, chuyển acceptance sang `NEEDS_RECALCULATION` và vô hiệu hóa export version cũ.
 - [ ] **TODO** — Xây dựng UI nghiệm thu, tạm ứng, công nợ và các trạng thái loading/error/empty.
-- [ ] **TODO** — Test race condition, timeout, số tiền biên và các chuyển trạng thái hợp lệ/không hợp lệ.
+- [ ] **IN PROGRESS** — Test race condition, timeout, số tiền biên và các chuyển trạng thái hợp lệ/không hợp lệ (đã có unit test công thức và trạng thái cơ bản; còn integration/race test).
 
 ## 7. Giai đoạn 5 — Export báo cáo Excel
 

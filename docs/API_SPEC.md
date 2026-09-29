@@ -271,6 +271,10 @@ Audit API chỉ đọc; không có endpoint sửa/xóa. `oldValues` và `newValu
 | POST | `/api/v1/contracts/{contractId}/advance-payments` | ACCOUNTANT_ADMIN | Ghi nhận 1 khoản tạm ứng mới |
 | DELETE | `/api/v1/advance-payments/{id}` | ACCOUNTANT_ADMIN | Xóa/hủy 1 khoản tạm ứng (chỉ khi chưa đưa vào đối chiếu công nợ) |
 
+Payload `POST` nhận `documentDate`, `documentNumber`, `description` và `amount`.
+`amount` không âm; sau khi hợp đồng đã có đối chiếu `RECONCILED`, khoản tạm ứng
+thuộc hợp đồng đó không được xóa để tránh thay đổi số liệu lịch sử.
+
 ### 5.2. Debt Reconciliation
 
 | Method | Endpoint | Role | Mô tả |
@@ -278,6 +282,11 @@ Audit API chỉ đọc; không có endpoint sửa/xóa. `oldValues` và `newValu
 | GET | `/api/v1/contracts/{contractId}/debt-reconciliations` | ACCOUNTANT_ADMIN | Lịch sử đối chiếu công nợ của hợp đồng |
 | POST | `/api/v1/contracts/{contractId}/debt-reconciliations` | ACCOUNTANT_ADMIN | Tạo bản đối chiếu công nợ mới cho kỳ hiện tại |
 | PUT | `/api/v1/debt-reconciliations/{id}/status` | ACCOUNTANT_ADMIN | Cập nhật trạng thái (`RECONCILED`) |
+
+Payload tạo đối chiếu: `{ "month": "YYYY-MM" }`. Hệ thống tính
+`remainingBalance = previousBalance + currentPeriodAcceptance - totalPaid`, trong đó
+`currentPeriodAcceptance` loại trừ acceptance ở trạng thái `NEEDS_RECALCULATION` và
+`totalPaid` là tổng tạm ứng có `documentDate` trong tháng.
 
 **Logic khi POST tạo mới:**
 1. Lấy `remaining_balance` của bản ghi gần nhất (theo `contractId`) làm `previous_balance`.
