@@ -1,20 +1,46 @@
 # API_SPEC — MACHINERY-LOG (Digital Logbook)
 
 > Đặc tả chi tiết REST API. Tất cả endpoint nghiệp vụ nằm dưới prefix `/api/v1`.
-> Response chuẩn hóa theo cấu trúc (xem PROJECT-RULES.md mục 4):
+> Response trả trực tiếp data object, không wrapping trong envelope `{success, data}`:
 > ```json
-> { "success": true, "data": {}, "message": "", "errorCode": null }
+> { "id": 1, "name": "..." }  // GET /api/v1/auth/me
+> ```
+> Riêng `/api/v1/auth/login`, `/api/v1/auth/refresh` trả AuthResponse trực tiếp:
+> ```json
+> { "accessToken": "...", "refreshToken": "...", "tokenType": "Bearer", "expiresInSeconds": 86400 }
 > ```
 
 ---
 
 ## 0. Xác thực
 
-| Method | Endpoint | Mô tả | Payload |
-|---|---|---|---|
-| POST | `/api/v1/auth/login` | Đăng nhập, trả về access token + refresh token | `{ "username": "", "password": "" }` |
-| POST | `/api/v1/auth/refresh` | Làm mới access token | `{ "refreshToken": "" }` |
-| POST | `/api/v1/auth/logout` | Thu hồi refresh token hiện tại | — (Bearer token) |
+| Method | Endpoint | Mô tả | Payload | Response |
+|---|---|---|---|---|
+| POST | `/api/v1/auth/login` | Đăng nhập, trả về access token + refresh token | `{ "username": "", "password": "" }` | AuthResponse |
+| POST | `/api/v1/auth/refresh` | Làm mới access token | `{ "refreshToken": "" }` | AuthResponse |
+| POST | `/api/v1/auth/logout` | Thu hồi refresh token hiện tại | — (Bearer token) | `200 OK` |
+| GET | `/api/v1/auth/me` | Lấy thông tin user hiện tại | — (Bearer token) | UserDto |
+
+AuthResponse:
+```json
+{
+  "accessToken": "eyJ...",
+  "refreshToken": "eyJ...",
+  "tokenType": "Bearer",
+  "expiresInSeconds": 86400
+}
+```
+
+UserDto:
+```json
+{
+  "id": 1,
+  "username": "admin",
+  "displayName": "Administrator",
+  "role": "ACCOUNTANT_ADMIN",
+  "isActive": true
+}
+```
 
 Mọi endpoint bên dưới (trừ mục 0) yêu cầu header:
 ```
@@ -347,6 +373,7 @@ Xuất bộ 3 báo cáo Excel (Bảng tổng hợp giờ làm, Biên bản bàn 
 
 | Method | Endpoint | Nhóm |
 |---|---|---|
+| GET | `/api/v1/auth/me` | Auth |
 | POST | `/api/v1/auth/login` | Auth |
 | POST | `/api/v1/auth/refresh` | Auth |
 | POST | `/api/v1/auth/logout` | Auth |

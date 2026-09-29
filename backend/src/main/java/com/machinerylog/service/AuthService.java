@@ -3,6 +3,7 @@ package com.machinerylog.service;
 import com.machinerylog.dto.AuthRequest;
 import com.machinerylog.dto.AuthResponse;
 import com.machinerylog.dto.RefreshRequest;
+import com.machinerylog.dto.UserDto;
 import com.machinerylog.entity.User;
 import com.machinerylog.repository.UserRepository;
 import com.machinerylog.security.JwtService;
@@ -37,6 +38,11 @@ public class AuthService {
             throw new IllegalArgumentException("Invalid refresh token");
         }
         return response(user);
+    }
+
+    public UserDto me() {
+        User user = (User) org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return new UserDto(user.getId(), user.getUsername(), user.getDisplayName(), user.getRole(), user.isActive());
     }
 
     public void logout() {

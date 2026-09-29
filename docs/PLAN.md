@@ -1,10 +1,22 @@
-# Kế hoạch triển khai MACHINERY-LOG
+﻿# Kế hoạch triển khai MACHINERY-LOG
 
 > Cập nhật: 2026-09-29
->
+
+> Gần đây nhất: Fix auth flow (/me endpoint, envelope sync, logout state clear).
+
 > Trạng thái được đối chiếu với mã nguồn hiện tại, không đánh dấu `DONE` chỉ dựa
 > trên tài liệu thiết kế. `DONE` nghĩa là đã có bằng chứng trong repository và
-> đã kiểm tra được ở mức phù hợp.
+> đã kiểm tra được ở mức phù hợp. Lưu ý cần cập nhật file này liên tục
+
+## 0. Gần đây nhất (2026-09-29)
+
+- [x] **DONE** — Fix auth flow: missing `/me` endpoint, envelope mismatch, stale state logout.
+  - Backend: thêm `GET /api/v1/auth/me` trả `UserDto` (id, username, displayName, role, isActive).
+  - Backend: `AuthService.me()` đọc user từ Spring Security context.
+  - Frontend: `login()` fetch `/me` sau login để lấy thông tin user chính xác (id, displayName).
+  - Frontend: `logout()` gọi `clearSession()` xóa token + user khỏi `sessionStorage`.
+  - API spec: cập nhật `/auth/me`, response không wrapping envelope.
+  - Frontend types: bổ sung `UserDto` type.
 
 ## 1. Hiện trạng đã xác nhận
 
@@ -99,4 +111,3 @@
 - [x] **DONE** — Tải được đủ 3 báo cáo Excel từ dữ liệu đã chốt.
 - [ ] **TODO** — Có audit trail đầy đủ, test cho happy path và các lỗi chính, build/CI xanh.
 - [ ] **TODO** — Tài liệu API, database, kiến trúc và UI khớp với code thực tế.
-

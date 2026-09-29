@@ -24,6 +24,7 @@ Stack: **ReactJS + TypeScript + TailwindCSS + Shadcn/ui** (Frontend) — **Java 
 | Viết/sửa **endpoint API**, biết payload/response/mã lỗi chuẩn | **`API_SPEC.md`** | Toàn bộ endpoint REST theo nhóm (Auth, OCR, Daily Logs, Danh mục, Nghiệm thu, Công nợ, Export), DTO mẫu, bảng mã lỗi (`errorCode`), quy tắc chung (phân trang, định dạng ngày...) |
 | Xây dựng **giao diện UI**, chọn màu/font/component, bố cục màn hình | **`UI-DESIGN.md`** | Nguyên tắc thiết kế (sáng - đơn giản - dễ nhìn - dễ dùng), bảng màu & typography, layout tổng thể, wireframe mô tả từng màn hình chính, component library, trạng thái phản hồi (loading/error/empty) |
 | Biết **quy ước code, naming, git, phân quyền, checklist trước commit** | **`PROJECT-RULES.md`** | Naming convention (DB/Backend/Frontend/API), phân quyền theo vai trò, giới hạn hệ thống, quy ước Git & commit message, quy ước comment, checklist trước khi commit/PR |
+| Xác định **trạng thái triển khai** (DONE/IN PROGRESS/TODO), tracking gần nhất | **`PLAN.md`** | Giai đoạn, mục tiêu, checklist tính năng theo thứ tự ưu tiên — *luôn đọc PLAN.md để biết phần nào còn làm dở* |
 
 ---
 
@@ -60,6 +61,7 @@ Dùng bảng dưới để xác định **thứ tự file cần đọc** tương
 - Khi thay đổi **layout/component/màu sắc chuẩn** → phải cập nhật `UI-DESIGN.md`.
 - Khi có **quyết định kiến trúc mới** (ADR) → bổ sung vào `ARCHITECTURE.md` mục 6, không tạo file rời rạc khác.
 - Khi thay đổi **quy ước code/git/phân quyền** → cập nhật `PROJECT-RULES.md`.
+- Khi hoàn thành một nhóm tính năng hoặc fix bug ảnh hưởng đến state project → cập nhật `PLAN.md` mục "Gần đây nhất".
 - **Không để tài liệu lệch với code thực tế** — tài liệu lệch code còn nguy hiểm hơn không có tài liệu, vì AI sẽ tin sai.
 
 ---

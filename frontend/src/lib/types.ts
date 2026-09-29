@@ -15,6 +15,29 @@ export type CurrentUser = {
   role: UserRole
 }
 
+// UserDto returned by /auth/me
+export type UserDto = {
+  id: number
+  username: string
+  displayName: string
+  role: UserRole
+  isActive: boolean
+}
+
+// ---- Health Check ----
+export type HealthStatus = 'UP' | 'DOWN'
+
+export type HealthCheckResult = {
+  status: HealthStatus
+  timestamp: string
+  database: {
+    connected: boolean
+    url: string
+  } | null
+  minio: null
+  details: Record<string, unknown>
+}
+
 // ---- Shared ----
 export type PageResponse<T> = {
   content: T[]

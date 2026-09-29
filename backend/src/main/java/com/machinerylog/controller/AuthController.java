@@ -4,6 +4,7 @@ import com.machinerylog.api.ApiError;
 import com.machinerylog.dto.AuthRequest;
 import com.machinerylog.dto.AuthResponse;
 import com.machinerylog.dto.RefreshRequest;
+import com.machinerylog.dto.UserDto;
 import com.machinerylog.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -32,5 +33,11 @@ public class AuthController {
     public ResponseEntity<ApiError> logout() {
         authService.logout();
         return ResponseEntity.ok(new ApiError(null, "Logout successful"));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDto> me() {
+        UserDto user = authService.me();
+        return ResponseEntity.ok(user);
     }
 }

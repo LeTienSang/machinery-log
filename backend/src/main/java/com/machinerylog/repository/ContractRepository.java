@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 import java.time.Instant;
 
 public interface ContractRepository extends JpaRepository<Contract, Long> {
+    @Query("select c from Contract c where (:search is null or lower(c.contractNumber) like lower(concat('%', :search, '%')) or lower(coalesce(c.projectName, '')) like lower(concat('%', :search, '%'))) and c.deletedAt is null")
+    Page<Contract> search(@Param("search") String search, Pageable pageable);
     @Query("""
         select c from Contract c
         where (:search is null or lower(c.contractNumber) like lower(concat('%', :search, '%')) or lower(coalesce(c.projectName, '')) like lower(concat('%', :search, '%')))

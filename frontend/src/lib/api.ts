@@ -1,9 +1,9 @@
 import axios from 'axios'
 import type {
-  AuthResponse, CurrentUser, PageResponse,
+  AuthResponse, CurrentUser, PageResponse, UserDto,
   DailyLog, Customer, Equipment, Contract, PricingAppendix,
   MonthlyAcceptance, AdvancePayment, DebtReconciliation, AuditLog,
-  ContractStatus,
+  ContractStatus, HealthCheckResult,
 } from './types'
 
 // ─── Axios instance ──────────────────────────────────────────────────────────
@@ -64,39 +64,44 @@ api.interceptors.response.use(undefined, async (error) => {
   }
 })
 
-// ─── Unwrap helper (backend wraps in { success, data }) ──────────────────────
-
-function unwrap<T>(response: { data: { data: T } | T }): T {
-  const payload = response.data as Record<string, unknown>
-  if ('success' in payload && 'data' in payload) return payload.data as T
-  return payload as unknown as T
-}
+// ─── Backend returns raw objects, no envelope ────────────────────────────────
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
 export async function login(username: string, password: string): Promise<CurrentUser> {
   const res = await api.post<AuthResponse>('/auth/login', { username, password })
   saveSession(res.data)
-  // Decode role from JWT payload — backend stores claim "role" (singular string)
+  // Fetch /me to get correct user info (id, displayName) from backend
   try {
-    const [, payload] = res.data.accessToken.split('.')
-    const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/'))) as Record<string, unknown>
-    // Backend JwtService: .claims(Map.of("role", user.getRole().name(), "type", type))
-    // subject is username (not id)
-    const rawRole = (decoded['role'] ?? decoded['roles'] ?? 'OPERATOR') as string
-    const role = (Array.isArray(rawRole) ? rawRole[0] : rawRole).replace('ROLE_', '') as CurrentUser['role']
+    const meRes = await api.get<UserDto>('/auth/me')
     const user: CurrentUser = {
-      id: 0, // backend doesn't put id in token; use 0 as placeholder
-      username: decoded['sub'] as string ?? username,
-      displayName: username, // displayName not in token; use username as fallback
-      role: role ?? 'OPERATOR',
+      id: meRes.data.id,
+      username: meRes.data.username,
+      displayName: meRes.data.displayName,
+      role: meRes.data.role,
     }
     saveSession(res.data, user)
     return user
   } catch {
-    const user: CurrentUser = { id: 0, username, displayName: username, role: 'OPERATOR' }
-    saveSession(res.data, user)
-    return user
+    // Fallback to JWT decoding if /me fails
+    try {
+      const [, payload] = res.data.accessToken.split('.')
+      const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/'))) as Record<string, unknown>
+      const rawRole = (decoded['role'] ?? decoded['roles'] ?? 'OPERATOR') as string
+      const role = (Array.isArray(rawRole) ? rawRole[0] : rawRole).replace('ROLE_', '') as CurrentUser['role']
+      const user: CurrentUser = {
+        id: 0,
+        username: decoded['sub'] as string ?? username,
+        displayName: username,
+        role: role ?? 'OPERATOR',
+      }
+      saveSession(res.data, user)
+      return user
+    } catch {
+      const user: CurrentUser = { id: 0, username, displayName: username, role: 'OPERATOR' }
+      saveSession(res.data, user)
+      return user
+    }
   }
 }
 
@@ -314,5 +319,9 @@ export async function getAuditLogs(params?: {
   return data
 }
 
-// Re-export unwrap in case needed
-export { unwrap }
+// ─── Health Check ───────────────────────────────────────────────────────────────
+
+export async function getHealth(): Promise<HealthCheckResult> {
+  const { data } = await api.get<HealthCheckResult>('/health')
+  return data
+}
