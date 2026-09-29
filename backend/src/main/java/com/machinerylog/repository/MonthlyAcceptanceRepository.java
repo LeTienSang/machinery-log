@@ -23,6 +23,4 @@ public interface MonthlyAcceptanceRepository extends JpaRepository<MonthlyAccept
     Optional<MonthlyAcceptance> findByIdForUpdate(@Param("id") Long id);
 
     boolean existsByContractIdAndEquipmentId(Long contractId, Long equipmentId);
-    boolean existsByContractId(Long contractId);
-    boolean existsByEquipmentId(Long equipmentId);
 }
