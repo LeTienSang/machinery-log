@@ -43,7 +43,12 @@ machinery-log:
   ocr:
     api-key: ${GEMINI_API_KEY:}
     endpoint: ${GEMINI_API_ENDPOINT:https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent}
-    max-attempts: ${GEMINI_MAX_ATTEMPTS:2}
+    timeout-ms: ${GEMINI_TIMEOUT_MS:30000}
+    max-attempts: ${GEMINI_MAX_ATTEMPTS:3}
+    initial-backoff-ms: ${GEMINI_INITIAL_BACKOFF_MS:1000}
+    backoff-multiplier: ${GEMINI_BACKOFF_MULTIPLIER:2.0}
+    max-requests-per-minute: ${GEMINI_MAX_REQUESTS_PER_MINUTE:15}
+    enable-fallback: ${GEMINI_ENABLE_FALLBACK:true}
     max-image-bytes: ${GEMINI_MAX_IMAGE_BYTES:10485760}
   security:
     jwt-secret: ${JWT_SECRET}

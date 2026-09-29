@@ -24,9 +24,21 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(OcrException.class)
     ResponseEntity<ApiError> handleOcr(OcrException exception, HttpServletRequest request) {
-        return response(request, exception.isTimeout() ? HttpStatus.GATEWAY_TIMEOUT : HttpStatus.BAD_GATEWAY,
-            exception.isTimeout() ? "OCR_SERVICE_TIMEOUT" : "OCR_SERVICE_ERROR", exception.getMessage());
+        HttpStatus status;
+        String errorCode;
+        if (exception.isTimeout()) {
+            status = HttpStatus.GATEWAY_TIMEOUT;
+            errorCode = "OCR_SERVICE_TIMEOUT";
+        } else if (exception.isRateLimited()) {
+            status = HttpStatus.TOO_MANY_REQUESTS;
+            errorCode = "OCR_QUOTA_EXCEEDED";
+        } else {
+            status = HttpStatus.BAD_GATEWAY;
+            errorCode = "OCR_SERVICE_ERROR";
+        }
+        return response(request, status, errorCode, exception.getMessage());
     }
+
 
     @ExceptionHandler(StorageException.class)
     ResponseEntity<ApiError> handleStorage(StorageException exception, HttpServletRequest request) {

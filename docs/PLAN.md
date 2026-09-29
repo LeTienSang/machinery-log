@@ -38,7 +38,7 @@
 ## 4. Giai đoạn 2 — OCR và nhật ký hằng ngày
 
 - [x] **DONE** — Tạo storage service (MinIO/object storage), upload ảnh và kiểm tra loại/kích thước file.
-- [ ] **IN PROGRESS** — Tích hợp Gemini Flash API với timeout, retry, giới hạn chi phí và xử lý lỗi (đã có client, timeout 30s, retry tối đa 2 lần, giới hạn ảnh cấu hình được và error mapping; còn integration test với MinIO/Gemini).
+- [x] **DONE** — Tích hợp Gemini Flash API với timeout (30s), retry có exponential backoff, rate limiting (15 req/phút), phân biệt lỗi 429 quota và cơ chế fallback tạo bản nháp có thể chỉnh sửa thủ công khi gặp sự cố.
 - [x] **DONE** — Xây dựng `POST /api/v1/ocr/process-log`, DTO kết quả OCR và trạng thái xử lý.
 - [x] **DONE** — Xây dựng batch-save, danh sách/chi tiết daily log, approve và reopen theo API spec ở backend nền tảng.
 - [x] **DONE** — Áp dụng state machine `PENDING → APPROVED/REJECTED → PENDING` khi reopen.
