@@ -77,18 +77,18 @@ function unwrap<T>(response: { data: { data: T } | T }): T {
 export async function login(username: string, password: string): Promise<CurrentUser> {
   const res = await api.post<AuthResponse>('/auth/login', { username, password })
   saveSession(res.data)
-  // Decode role from JWT payload (simple base64 decode of payload section)
+  // Decode role from JWT payload — backend stores claim "role" (singular string)
   try {
     const [, payload] = res.data.accessToken.split('.')
     const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/'))) as Record<string, unknown>
-    const roles = (decoded.roles ?? decoded.role ?? decoded.authorities ?? []) as string[]
-    const role = Array.isArray(roles)
-      ? (roles[0]?.replace('ROLE_', '') as CurrentUser['role'])
-      : (roles as unknown as string).replace('ROLE_', '') as CurrentUser['role']
+    // Backend JwtService: .claims(Map.of("role", user.getRole().name(), "type", type))
+    // subject is username (not id)
+    const rawRole = (decoded['role'] ?? decoded['roles'] ?? 'OPERATOR') as string
+    const role = (Array.isArray(rawRole) ? rawRole[0] : rawRole).replace('ROLE_', '') as CurrentUser['role']
     const user: CurrentUser = {
-      id: decoded.sub ? Number(decoded.sub) : 0,
-      username: decoded.username as string ?? username,
-      displayName: decoded.displayName as string ?? username,
+      id: 0, // backend doesn't put id in token; use 0 as placeholder
+      username: decoded['sub'] as string ?? username,
+      displayName: username, // displayName not in token; use username as fallback
       role: role ?? 'OPERATOR',
     }
     saveSession(res.data, user)

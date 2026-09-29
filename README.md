@@ -38,6 +38,21 @@ Yêu cầu: JDK 21, Maven, Node.js 22+, npm và Docker Compose.
 
 Frontend mặc định ở `http://localhost:5173`, backend ở `http://localhost:8080`.
 
+## Tài khoản mẫu (Profile `local`)
+
+Khi chạy với `$env:SPRING_PROFILES_ACTIVE = "local"`, hệ thống tự khởi tạo 2 tài khoản dev:
+
+| Tài khoản | Mật khẩu mặc định | Vai trò | Quyền hạn |
+|---|---|---|---|
+| `operator` | `operator-local-change-me` | OPERATOR | Upload nhật ký, xem log của mình |
+| `accountant` | `accountant-local-change-me` | ACCOUNTANT_ADMIN | Toàn quyền: Duyệt log, Quản lý danh mục, Công nợ, Xuất báo cáo, Audit log |
+
+*(Mật khẩu có thể ghi đè qua biến môi trường `DEV_OPERATOR_PASSWORD` và `DEV_ACCOUNTANT_PASSWORD`).*
+
+## Health check & Actuator
+
+- Health endpoint: `http://localhost:8080/actuator/health`
+
 ## Kiểm tra
 
 ```powershell

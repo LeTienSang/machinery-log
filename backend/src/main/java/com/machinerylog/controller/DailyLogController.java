@@ -33,9 +33,10 @@ public class DailyLogController {
     public ResponseEntity<?> search(@RequestParam(required = false) Long contractId,
                                     @RequestParam(required = false) Long equipmentId,
                                     @RequestParam(required = false) String month,
-                                    @PageableDefault(page = 0, size = 20) Pageable pageable) {
+                                    @RequestParam(required = false) String approvalStatus,
+                                    @PageableDefault(page = 0, size = 50) Pageable pageable) {
         Pageable bounded = PageRequest.of(pageable.getPageNumber(), Math.min(pageable.getPageSize(), 100), pageable.getSort());
-        return ResponseEntity.ok(dailyLogs.search(contractId, equipmentId, month, bounded));
+        return ResponseEntity.ok(dailyLogs.search(contractId, equipmentId, month, approvalStatus, bounded));
     }
 
     @GetMapping("/{id}")

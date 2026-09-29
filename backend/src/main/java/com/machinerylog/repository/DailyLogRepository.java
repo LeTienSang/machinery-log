@@ -16,12 +16,14 @@ public interface DailyLogRepository extends JpaRepository<DailyLog, Long> {
           and (:equipmentId is null or log.equipmentId = :equipmentId)
           and (:fromDate is null or log.workDate >= :fromDate)
           and (:toDate is null or log.workDate < :toDate)
+          and (:approvalStatus is null or log.approvalStatus = :approvalStatus)
         order by log.workDate desc, log.id desc
         """)
     Page<DailyLog> search(@Param("contractId") Long contractId,
                           @Param("equipmentId") Long equipmentId,
                           @Param("fromDate") LocalDate fromDate,
                           @Param("toDate") LocalDate toDate,
+                          @Param("approvalStatus") com.machinerylog.entity.ApprovalStatus approvalStatus,
                           Pageable pageable);
 
     @Query("""

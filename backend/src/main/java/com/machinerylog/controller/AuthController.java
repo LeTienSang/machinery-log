@@ -24,4 +24,11 @@ public class AuthController {
     public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshRequest request) {
         return ResponseEntity.ok(authService.refresh(request));
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        // Stateless JWT: token invalidation is client-side.
+        // Server acknowledges logout; client must discard tokens.
+        return ResponseEntity.noContent().build();
+    }
 }

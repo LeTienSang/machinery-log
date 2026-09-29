@@ -45,7 +45,7 @@ public class DailyLogService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<DailyLogDto> search(Long contractId, Long equipmentId, String month, Pageable pageable) {
+    public PageResponse<DailyLogDto> search(Long contractId, Long equipmentId, String month, String approvalStatus, Pageable pageable) {
         LocalDate fromDate = null;
         LocalDate toDate = null;
         if (month != null && !month.isBlank()) {
@@ -53,7 +53,11 @@ public class DailyLogService {
             fromDate = yearMonth.atDay(1);
             toDate = yearMonth.plusMonths(1).atDay(1);
         }
-        return PageResponse.from(logs.search(contractId, equipmentId, fromDate, toDate, pageable).map(this::toDto));
+        ApprovalStatus status = null;
+        if (approvalStatus != null && !approvalStatus.isBlank()) {
+            try { status = ApprovalStatus.valueOf(approvalStatus); } catch (IllegalArgumentException ignored) { }
+        }
+        return PageResponse.from(logs.search(contractId, equipmentId, fromDate, toDate, status, pageable).map(this::toDto));
     }
 
     @Transactional(readOnly = true)

@@ -26,6 +26,14 @@ server:
   port: ${SERVER_PORT:8080}
   error:
     include-message: never
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
 machinery-log:
   storage:
     endpoint: ${FILE_STORAGE_ENDPOINT:http://localhost:9000}
