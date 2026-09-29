@@ -8,19 +8,36 @@ import com.machinerylog.entity.ApprovalStatus;
 import com.machinerylog.entity.DailyLog;
 import com.machinerylog.exception.ResourceNotFoundException;
 import com.machinerylog.repository.DailyLogRepository;
+import com.machinerylog.repository.MonthlyAcceptanceRepository;
 import com.machinerylog.ocr.OcrResult;
 import java.time.LocalDate;
+import java.time.Instant;
 import java.time.YearMonth;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DailyLogService {
     private final DailyLogRepository logs;
+    private final AuditLogService auditLogs;
+    private final MonthlyAcceptanceRepository acceptances;
 
-    public DailyLogService(DailyLogRepository logs) { this.logs = logs; }
+    public DailyLogService(DailyLogRepository logs) { this(logs, null, null); }
+
+    @Autowired
+    public DailyLogService(DailyLogRepository logs, AuditLogService auditLogs) {
+        this(logs, auditLogs, null);
+    }
+
+    public DailyLogService(DailyLogRepository logs, AuditLogService auditLogs,
+                           MonthlyAcceptanceRepository acceptances) {
+        this.logs = logs;
+        this.auditLogs = auditLogs;
+        this.acceptances = acceptances;
+    }
 
     @Transactional
     public List<DailyLogDto> batchSave(List<DailyLogDto> requests) {
@@ -80,7 +97,9 @@ public class DailyLogService {
         log.setApprovalStatus(request.approvalStatus());
         log.setRejectionReason(request.rejectionReason());
         log.setReviewerId(reviewerId);
-        return toDto(logs.save(log));
+        DailyLog saved = logs.save(log);
+        recordAudit(reviewerId, saved.getApprovalStatus() == ApprovalStatus.APPROVED ? "APPROVE" : "REJECT", saved.getId(), request.rejectionReason());
+        return toDto(saved);
     }
 
     @Transactional
@@ -92,7 +111,10 @@ public class DailyLogService {
         log.setApprovalStatus(ApprovalStatus.PENDING);
         log.setRejectionReason(request.reopenReason());
         log.setReviewerId(reviewerId);
-        return toDto(logs.save(log));
+        DailyLog saved = logs.save(log);
+        invalidateAcceptance(saved, request.reopenReason());
+        recordAudit(reviewerId, "REOPEN", saved.getId(), request.reopenReason());
+        return toDto(saved);
     }
 
     private DailyLog save(DailyLogDto request) {
@@ -124,5 +146,26 @@ public class DailyLogService {
             log.getEveningStartTime(), log.getEveningEndTime(), log.getOperatingHours(), log.getStandbyHours(),
             log.getWorkDescription(), log.getOperatorName(), log.getOriginalImageUrl(), log.getApprovalStatus(),
             log.getRejectionReason());
+    }
+
+    private void recordAudit(Long actorUserId, String action, Long entityId, String reason) {
+        if (auditLogs != null) {
+            auditLogs.record(actorUserId, action, "DailyLog", entityId, null, null, reason, null);
+        }
+    }
+
+    private void invalidateAcceptance(DailyLog log, String reason) {
+        if (acceptances == null || log.getWorkDate() == null) return;
+        String month = YearMonth.from(log.getWorkDate()).toString();
+        acceptances.findByContractIdAndEquipmentIdAndBillingMonth(log.getContractId(), log.getEquipmentId(), month)
+            .ifPresent(acceptance -> {
+                acceptance.setStatus(com.machinerylog.entity.AcceptanceStatus.NEEDS_RECALCULATION);
+                acceptance.setExportInvalidatedAt(Instant.now());
+                MonthlyAcceptanceRepository repository = acceptances;
+                repository.save(acceptance);
+                if (auditLogs != null) {
+                    auditLogs.record(null, "EXPORT_INVALIDATED", "MonthlyAcceptance", acceptance.getId(), null, null, reason, null);
+                }
+            });
     }
 }

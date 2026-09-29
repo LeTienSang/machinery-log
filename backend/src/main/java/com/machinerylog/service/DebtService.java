@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -26,15 +27,26 @@ public class DebtService {
     private final DebtReconciliationRepository reconciliations;
     private final MonthlyAcceptanceRepository acceptances;
     private final ContractRepository contracts;
+    private final AuditLogService auditLogs;
 
     public DebtService(AdvancePaymentRepository payments,
                        DebtReconciliationRepository reconciliations,
                        MonthlyAcceptanceRepository acceptances,
                        ContractRepository contracts) {
+        this(payments, reconciliations, acceptances, contracts, null);
+    }
+
+    @Autowired
+    public DebtService(AdvancePaymentRepository payments,
+                       DebtReconciliationRepository reconciliations,
+                       MonthlyAcceptanceRepository acceptances,
+                       ContractRepository contracts,
+                       AuditLogService auditLogs) {
         this.payments = payments;
         this.reconciliations = reconciliations;
         this.acceptances = acceptances;
         this.contracts = contracts;
+        this.auditLogs = auditLogs;
     }
 
     @Transactional(readOnly = true)
@@ -97,7 +109,11 @@ public class DebtService {
         reconciliation.setTotalPaid(money(totalPaid));
         reconciliation.setRemainingBalance(money(previousBalance.add(currentAcceptance).subtract(totalPaid)));
         reconciliation.setStatus(DebtReconciliationStatus.PENDING_RECONCILIATION);
-        return toDto(reconciliations.save(reconciliation));
+        DebtReconciliation saved = reconciliations.save(reconciliation);
+        if (auditLogs != null) {
+            auditLogs.record(null, "RECONCILE", "DebtReconciliation", saved.getId(), null, null, request.month(), null);
+        }
+        return toDto(saved);
     }
 
     @Transactional
@@ -108,7 +124,11 @@ public class DebtService {
             throw new IllegalStateException("Only pending reconciliations can be reconciled");
         }
         reconciliation.setStatus(DebtReconciliationStatus.RECONCILED);
-        return toDto(reconciliations.save(reconciliation));
+        DebtReconciliation saved = reconciliations.save(reconciliation);
+        if (auditLogs != null) {
+            auditLogs.record(null, "RECONCILE", "DebtReconciliation", saved.getId(), null, null, null, null);
+        }
+        return toDto(saved);
     }
 
     private void requireContract(Long id) {

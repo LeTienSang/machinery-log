@@ -59,7 +59,7 @@
 - [x] **DONE** — Implement state machine nghiệm thu, khóa dữ liệu và chống tạo bản ghi trùng (đã có `PENDING_SIGNATURE → SIGNED`, pessimistic lock và unique constraint; logic tính lại gắn với approved logs).
 - [x] **DONE** — Implement Advance Payments và Debt Reconciliation theo công thức trong `DATABASE.md`; đã có CRUD tạm ứng, tạo/lịch sử/chốt đối chiếu và tính `previous + acceptance - paid` theo tháng.
 - [x] **DONE** — Dùng `BigDecimal` cho toàn bộ phép tính tiền/giờ; đã có service calculate với rounding `HALF_UP` và test regression cho số liệu.
-- [ ] **TODO** — Khi reopen log, chuyển acceptance sang `NEEDS_RECALCULATION` và vô hiệu hóa export version cũ.
+- [x] **DONE** — Khi reopen log, chuyển acceptance sang `NEEDS_RECALCULATION`, set `exportInvalidatedAt` và ghi audit `EXPORT_INVALIDATED`.
 - [ ] **TODO** — Xây dựng UI nghiệm thu, tạm ứng, công nợ và các trạng thái loading/error/empty.
 - [ ] **IN PROGRESS** — Test race condition, timeout, số tiền biên và các chuyển trạng thái hợp lệ/không hợp lệ (đã có unit test công thức và trạng thái cơ bản; còn integration/race test).
 
@@ -73,7 +73,7 @@
 
 ## 8. Giai đoạn 6 — Audit, vận hành và chất lượng
 
-- [ ] **TODO** — Ghi `audit_logs` JSONB theo nguyên tắc append-only, không lưu secret/ảnh nhạy cảm ngoài quy định.
+- [ ] **IN PROGRESS** — Ghi `audit_logs` JSONB theo nguyên tắc append-only, không lưu secret/ảnh nhạy cảm ngoài quy định (đã có entity/repository, trigger DB, API đọc, request correlation và ghi các action review/sign/reconcile/export; còn snapshot `oldValues/newValues` đầy đủ).
 - [ ] **TODO** — Bổ sung health check, migration check, cấu hình production và backup database/object storage.
 - [ ] **TODO** — Thêm test API contract, integration test với PostgreSQL/MinIO mock và frontend component/e2e test.
 - [ ] **TODO** — Kiểm tra accessibility, responsive UI và các feedback state theo `UI-DESIGN.md`.

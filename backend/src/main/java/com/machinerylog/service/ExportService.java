@@ -21,6 +21,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -30,17 +31,29 @@ public class ExportService {
     private final MonthlyAcceptanceRepository acceptances;
     private final DebtReconciliationRepository reconciliations;
     private final MonthlyAcceptanceService acceptanceService;
+    private final AuditLogService auditLogs;
 
     public ExportService(ContractRepository contracts,
                          DailyLogRepository dailyLogs,
                          MonthlyAcceptanceRepository acceptances,
                          DebtReconciliationRepository reconciliations,
                          MonthlyAcceptanceService acceptanceService) {
+        this(contracts, dailyLogs, acceptances, reconciliations, acceptanceService, null);
+    }
+
+    @Autowired
+    public ExportService(ContractRepository contracts,
+                         DailyLogRepository dailyLogs,
+                         MonthlyAcceptanceRepository acceptances,
+                         DebtReconciliationRepository reconciliations,
+                         MonthlyAcceptanceService acceptanceService,
+                         AuditLogService auditLogs) {
         this.contracts = contracts;
         this.dailyLogs = dailyLogs;
         this.acceptances = acceptances;
         this.reconciliations = reconciliations;
         this.acceptanceService = acceptanceService;
+        this.auditLogs = auditLogs;
     }
 
     @Transactional
@@ -82,6 +95,9 @@ public class ExportService {
             Instant exportedAt = Instant.now();
             monthly.forEach(value -> value.setLastExportedAt(exportedAt));
             acceptances.saveAll(monthly);
+            if (auditLogs != null) {
+                monthly.forEach(value -> auditLogs.record(null, "EXPORT_CREATED", "MonthlyAcceptance", value.getId(), null, null, month, null));
+            }
             return zip(month, hours, acceptance, debtReport);
         } catch (IOException exception) {
             throw new IllegalStateException("Excel generation failed", exception);

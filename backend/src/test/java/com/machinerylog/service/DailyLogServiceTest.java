@@ -9,8 +9,12 @@ import com.machinerylog.dto.DailyLogApprovalRequest;
 import com.machinerylog.dto.DailyLogReopenRequest;
 import com.machinerylog.entity.ApprovalStatus;
 import com.machinerylog.entity.DailyLog;
+import com.machinerylog.entity.AcceptanceStatus;
+import com.machinerylog.entity.MonthlyAcceptance;
 import com.machinerylog.exception.ResourceNotFoundException;
 import com.machinerylog.repository.DailyLogRepository;
+import com.machinerylog.repository.MonthlyAcceptanceRepository;
+import java.time.LocalDate;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +24,8 @@ import org.mockito.MockitoAnnotations;
 class DailyLogServiceTest {
     @Mock
     private DailyLogRepository logs;
+    @Mock
+    private MonthlyAcceptanceRepository acceptances;
     private DailyLogService service;
 
     @BeforeEach
@@ -50,6 +56,28 @@ class DailyLogServiceTest {
 
         assertEquals(ApprovalStatus.PENDING, result.approvalStatus());
         assertEquals("Cập nhật giờ máy", result.rejectionReason());
+    }
+
+    @Test
+    void invalidatesMonthlyAcceptanceWhenApprovedLogIsReopened() {
+        DailyLog log = log(ApprovalStatus.APPROVED);
+        log.setContractId(10L);
+        log.setEquipmentId(20L);
+        log.setWorkDate(LocalDate.of(2026, 9, 12));
+        MonthlyAcceptance acceptance = new MonthlyAcceptance();
+        acceptance.setStatus(AcceptanceStatus.SIGNED);
+        when(logs.findById(1L)).thenReturn(Optional.of(log));
+        when(logs.save(any(DailyLog.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(acceptances.findByContractIdAndEquipmentIdAndBillingMonth(10L, 20L, "2026-09"))
+            .thenReturn(Optional.of(acceptance));
+        when(acceptances.save(any(MonthlyAcceptance.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        DailyLogService serviceWithAcceptance = new DailyLogService(logs, null, acceptances);
+        serviceWithAcceptance.reopen(1L, new DailyLogReopenRequest("Điều chỉnh giờ"), 7L);
+
+        assertEquals(AcceptanceStatus.NEEDS_RECALCULATION, acceptance.getStatus());
+        org.junit.jupiter.api.Assertions.assertNotNull(acceptance.getExportInvalidatedAt());
     }
 
     @Test

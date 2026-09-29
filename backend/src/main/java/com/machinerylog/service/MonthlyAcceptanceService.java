@@ -22,6 +22,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -30,13 +31,23 @@ public class MonthlyAcceptanceService {
     private final MonthlyAcceptanceRepository acceptances;
     private final DailyLogRepository dailyLogs;
     private final PricingAppendixRepository pricingAppendices;
+    private final AuditLogService auditLogs;
 
     public MonthlyAcceptanceService(MonthlyAcceptanceRepository acceptances,
                                    DailyLogRepository dailyLogs,
                                    PricingAppendixRepository pricingAppendices) {
+        this(acceptances, dailyLogs, pricingAppendices, null);
+    }
+
+    @Autowired
+    public MonthlyAcceptanceService(MonthlyAcceptanceRepository acceptances,
+                                   DailyLogRepository dailyLogs,
+                                   PricingAppendixRepository pricingAppendices,
+                                   AuditLogService auditLogs) {
         this.acceptances = acceptances;
         this.dailyLogs = dailyLogs;
         this.pricingAppendices = pricingAppendices;
+        this.auditLogs = auditLogs;
     }
 
     @Transactional(readOnly = true)
@@ -55,7 +66,11 @@ public class MonthlyAcceptanceService {
             throw new IllegalStateException("Only pending acceptances can be signed");
         }
         acceptance.setStatus(AcceptanceStatus.SIGNED);
-        return toDto(acceptances.save(acceptance));
+        MonthlyAcceptance saved = acceptances.save(acceptance);
+        if (auditLogs != null) {
+            auditLogs.record(null, "SIGN", "MonthlyAcceptance", saved.getId(), null, null, null, null);
+        }
+        return toDto(saved);
     }
 
     @Transactional

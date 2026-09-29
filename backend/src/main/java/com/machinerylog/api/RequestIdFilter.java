@@ -23,6 +23,11 @@ public class RequestIdFilter extends OncePerRequestFilter {
         }
         request.setAttribute(REQUEST_ID_ATTRIBUTE, requestId);
         response.setHeader(HEADER, requestId);
-        filterChain.doFilter(request, response);
+        RequestIdContext.set(requestId);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            RequestIdContext.clear();
+        }
     }
 }

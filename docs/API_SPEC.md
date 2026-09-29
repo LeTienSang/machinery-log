@@ -258,6 +258,8 @@ State machine của acceptance: `PENDING_SIGNATURE → SIGNED`; khi một daily 
 | GET | `/api/v1/audit-logs` | ACCOUNTANT_ADMIN | Tra cứu audit theo `entityType`, `entityId`, `actorUserId`, `action`, `from`, `to` |
 
 Audit API chỉ đọc; không có endpoint sửa/xóa. `oldValues` và `newValues` trả JSON object từ PostgreSQL JSONB, không chứa password/token.
+Backend hiện ghi audit cho các thao tác review daily log, ký nghiệm thu, đối chiếu công nợ
+và tạo export; API tra cứu hỗ trợ các bộ lọc ở bảng trên.
 
 ---
 
