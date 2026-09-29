@@ -17,4 +17,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     @Modifying
     @Query("update Customer c set c.deletedAt = :deletedAt where c.id = :id")
     int softDelete(@Param("id") Long id, @Param("deletedAt") Instant deletedAt);
+
+    boolean existsByTaxCodeAndDeletedAtIsNull(String taxCode);
+    boolean existsByTaxCodeAndDeletedAtIsNullAndIdNot(String taxCode, Long id);
 }

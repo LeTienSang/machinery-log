@@ -21,4 +21,6 @@ public interface MonthlyAcceptanceRepository extends JpaRepository<MonthlyAccept
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select a from MonthlyAcceptance a where a.id = :id")
     Optional<MonthlyAcceptance> findByIdForUpdate(@Param("id") Long id);
+
+    boolean existsByContractIdAndEquipmentId(Long contractId, Long equipmentId);
 }

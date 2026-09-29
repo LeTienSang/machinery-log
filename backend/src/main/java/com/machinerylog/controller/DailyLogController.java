@@ -1,5 +1,6 @@
 package com.machinerylog.controller;
 
+import com.machinerylog.api.ApiError;
 import com.machinerylog.dto.DailyLogApprovalRequest;
 import com.machinerylog.dto.DailyLogDto;
 import com.machinerylog.dto.DailyLogReopenRequest;
@@ -24,40 +25,40 @@ public class DailyLogController {
 
     @PostMapping("/batch-save")
     @PreAuthorize("hasRole('ACCOUNTANT_ADMIN')")
-    public ResponseEntity<List<DailyLogDto>> batchSave(@RequestBody List<@Valid DailyLogDto> requests) {
-        return ResponseEntity.ok(dailyLogs.batchSave(requests));
+    public ResponseEntity<ApiError> batchSave(@RequestBody List<@Valid DailyLogDto> requests) {
+        return ResponseEntity.ok(new ApiError(dailyLogs.batchSave(requests), "Daily logs saved"));
     }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('OPERATOR', 'ACCOUNTANT_ADMIN')")
-    public ResponseEntity<?> search(@RequestParam(required = false) Long contractId,
+    public ResponseEntity<ApiError> search(@RequestParam(required = false) Long contractId,
                                     @RequestParam(required = false) Long equipmentId,
                                     @RequestParam(required = false) String month,
                                     @RequestParam(required = false) String approvalStatus,
                                     @PageableDefault(page = 0, size = 50) Pageable pageable) {
         Pageable bounded = PageRequest.of(pageable.getPageNumber(), Math.min(pageable.getPageSize(), 100), pageable.getSort());
-        return ResponseEntity.ok(dailyLogs.search(contractId, equipmentId, month, approvalStatus, bounded));
+        return ResponseEntity.ok(new ApiError(dailyLogs.search(contractId, equipmentId, month, approvalStatus, bounded), "Daily logs retrieved"));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('OPERATOR', 'ACCOUNTANT_ADMIN')")
-    public ResponseEntity<DailyLogDto> get(@PathVariable Long id) {
-        return ResponseEntity.ok(dailyLogs.get(id));
+    public ResponseEntity<ApiError> get(@PathVariable Long id) {
+        return ResponseEntity.ok(new ApiError(dailyLogs.get(id), "Daily log retrieved"));
     }
 
     @PutMapping("/{id}/approve")
     @PreAuthorize("hasRole('ACCOUNTANT_ADMIN')")
-    public ResponseEntity<DailyLogDto> approve(@PathVariable Long id,
+    public ResponseEntity<ApiError> approve(@PathVariable Long id,
                                                @Valid @RequestBody DailyLogApprovalRequest request,
                                                @AuthenticationPrincipal User reviewer) {
-        return ResponseEntity.ok(dailyLogs.approve(id, request, reviewer.getId()));
+        return ResponseEntity.ok(new ApiError(dailyLogs.approve(id, request, reviewer.getId()), "Daily log reviewed"));
     }
 
     @PostMapping("/{id}/reopen")
     @PreAuthorize("hasRole('ACCOUNTANT_ADMIN')")
-    public ResponseEntity<DailyLogDto> reopen(@PathVariable Long id,
+    public ResponseEntity<ApiError> reopen(@PathVariable Long id,
                                               @Valid @RequestBody DailyLogReopenRequest request,
                                               @AuthenticationPrincipal User reviewer) {
-        return ResponseEntity.ok(dailyLogs.reopen(id, request, reviewer.getId()));
+        return ResponseEntity.ok(new ApiError(dailyLogs.reopen(id, request, reviewer.getId()), "Daily log reopened"));
     }
 }

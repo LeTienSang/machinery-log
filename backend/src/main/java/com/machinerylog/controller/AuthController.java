@@ -1,5 +1,6 @@
 package com.machinerylog.controller;
 
+import com.machinerylog.api.ApiError;
 import com.machinerylog.dto.AuthRequest;
 import com.machinerylog.dto.AuthResponse;
 import com.machinerylog.dto.RefreshRequest;
@@ -16,19 +17,20 @@ public class AuthController {
     public AuthController(AuthService authService) { this.authService = authService; }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+    public ResponseEntity<ApiError> login(@Valid @RequestBody AuthRequest request) {
+        AuthResponse response = authService.login(request);
+        return ResponseEntity.ok(new ApiError(response, "Login successful"));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshRequest request) {
-        return ResponseEntity.ok(authService.refresh(request));
+    public ResponseEntity<ApiError> refresh(@Valid @RequestBody RefreshRequest request) {
+        AuthResponse response = authService.refresh(request);
+        return ResponseEntity.ok(new ApiError(response, "Token refreshed"));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout() {
-        // Stateless JWT: token invalidation is client-side.
-        // Server acknowledges logout; client must discard tokens.
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<ApiError> logout() {
+        authService.logout();
+        return ResponseEntity.ok(new ApiError(null, "Logout successful"));
     }
 }

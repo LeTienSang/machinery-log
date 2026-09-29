@@ -17,4 +17,7 @@ public interface EquipmentRepository extends JpaRepository<Equipment, Long> {
     @Modifying
     @Query("update Equipment e set e.deletedAt = :deletedAt where e.id = :id")
     int softDelete(@Param("id") Long id, @Param("deletedAt") Instant deletedAt);
+
+    boolean existsBySerialRegistrationNumberAndDeletedAtIsNull(String serial);
+    boolean existsBySerialRegistrationNumberAndDeletedAtIsNullAndIdNot(String serial, Long id);
 }

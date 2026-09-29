@@ -8,8 +8,17 @@ import org.springframework.data.repository.query.Param;
 import java.time.Instant;
 
 public interface ContractRepository extends JpaRepository<Contract, Long> {
-    @Query("select c from Contract c where (:search is null or lower(c.contractNumber) like lower(concat('%', :search, '%')) or lower(coalesce(c.projectName, '')) like lower(concat('%', :search, '%'))) and c.deletedAt is null")
-    Page<Contract> search(@Param("search") String search, Pageable pageable);
+    @Query("""
+        select c from Contract c
+        where (:search is null or lower(c.contractNumber) like lower(concat('%', :search, '%')) or lower(coalesce(c.projectName, '')) like lower(concat('%', :search, '%')))
+          and (:customerId is null or c.customerId = :customerId)
+          and (:status is null or c.status = :status)
+          and c.deletedAt is null
+        """)
+    Page<Contract> search(@Param("search") String search,
+                          @Param("customerId") Long customerId,
+                          @Param("status") com.machinerylog.entity.ContractStatus status,
+                          Pageable pageable);
     
     @Query("select c from Contract c where c.id = :id and c.deletedAt is null")
     Contract findByIdAndNotDeleted(@Param("id") Long id);
@@ -17,4 +26,8 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
     @Modifying
     @Query("update Contract c set c.deletedAt = :deletedAt where c.id = :id")
     int softDelete(@Param("id") Long id, @Param("deletedAt") Instant deletedAt);
+
+    boolean existsByCustomerIdAndDeletedAtIsNull(Long customerId);
+    boolean existsByContractNumberAndDeletedAtIsNull(String contractNumber);
+    boolean existsByContractNumberAndDeletedAtIsNullAndIdNot(String contractNumber, Long id);
 }

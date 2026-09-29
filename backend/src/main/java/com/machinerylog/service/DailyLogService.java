@@ -135,6 +135,7 @@ public class DailyLogService {
         log.setOperatingHours(request.operatingHours() == null ? java.math.BigDecimal.ZERO : request.operatingHours());
         log.setStandbyHours(request.standbyHours() == null ? java.math.BigDecimal.ZERO : request.standbyHours());
         log.setWorkDescription(request.workDescription());
+        log.setOperatorId(request.operatorId());
         log.setOperatorName(request.operatorName());
         log.setOriginalImageUrl(request.originalImageUrl());
         return logs.save(log);
@@ -148,7 +149,8 @@ public class DailyLogService {
         return new DailyLogDto(log.getId(), log.getContractId(), log.getEquipmentId(), log.getWorkDate(),
             log.getMorningStartTime(), log.getMorningEndTime(), log.getAfternoonStartTime(), log.getAfternoonEndTime(),
             log.getEveningStartTime(), log.getEveningEndTime(), log.getOperatingHours(), log.getStandbyHours(),
-            log.getWorkDescription(), log.getOperatorName(), log.getOriginalImageUrl(), log.getApprovalStatus(),
+            log.getWorkDescription(), log.getOperatorId(), log.getOperatorName(), log.getReviewerId(), null,
+            log.getOriginalImageUrl(), log.getApprovalStatus(),
             log.getRejectionReason());
     }
 

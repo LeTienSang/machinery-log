@@ -15,4 +15,6 @@ public interface AdvancePaymentRepository extends JpaRepository<AdvancePayment, 
     BigDecimal sumAmountByContractIdAndDocumentDateBetween(@Param("contractId") Long contractId,
                                                             @Param("fromDate") LocalDate fromDate,
                                                             @Param("toDate") LocalDate toDate);
+
+    boolean existsByContractId(Long contractId);
 }

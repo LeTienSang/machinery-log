@@ -66,7 +66,7 @@ public class ExportService {
         LocalDate toDate = yearMonth.plusMonths(1).atDay(1);
         List<DailyLog> approvedLogs = dailyLogs.findApprovedByContractIdBetweenDateRange(contractId, fromDate, toDate);
         if (approvedLogs.isEmpty()) {
-            throw new IllegalArgumentException("No approved logs for contract and month");
+            throw new com.machinerylog.exception.BusinessException("NO_APPROVED_LOGS", "No approved logs for contract and month");
         }
 
         List<MonthlyAcceptance> monthly = acceptances.findByContractIdAndBillingMonthOrderByEquipmentId(contractId, month);

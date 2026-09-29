@@ -7,6 +7,7 @@ import java.util.UUID;
 public record AuditLogDto(
     Long id,
     Long actorUserId,
+    String actorUsername,
     String action,
     String entityType,
     Long entityId,

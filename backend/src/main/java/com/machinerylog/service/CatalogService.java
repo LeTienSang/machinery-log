@@ -49,7 +49,7 @@ public class CatalogService {
     @Transactional public void deleteEquipment(Long id) { if (equipment.softDelete(id, Instant.now()) == 0) throw new ResourceNotFoundException("Equipment not found: " + id); }
 
     @Transactional(readOnly = true) public PageResponse<ContractDto> contracts(String search, Pageable page) {
-        return PageResponse.from(contracts.search(blankToNull(search), page).map(this::contractDto));
+        return PageResponse.from(contracts.search(blankToNull(search), null, null, page).map(this::contractDto));
     }
     @Transactional(readOnly = true) public ContractDto contract(Long id) { return contractDto(findContract(id)); }
     @Transactional public ContractDto save(ContractDto dto) {

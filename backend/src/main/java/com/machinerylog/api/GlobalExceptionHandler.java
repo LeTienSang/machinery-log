@@ -2,11 +2,13 @@ package com.machinerylog.api;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import com.machinerylog.exception.BusinessException;
 import com.machinerylog.exception.ResourceNotFoundException;
 import com.machinerylog.ocr.OcrException;
 import com.machinerylog.ocr.OcrInputException;
@@ -43,6 +45,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(StorageException.class)
     ResponseEntity<ApiError> handleStorage(StorageException exception, HttpServletRequest request) {
         return response(request, HttpStatus.BAD_GATEWAY, "STORAGE_SERVICE_ERROR", "Image storage is unavailable");
+    }
+    @ExceptionHandler(BusinessException.class)
+    ResponseEntity<ApiError> handleBusiness(BusinessException exception, HttpServletRequest request) {
+        return response(request, HttpStatus.BAD_REQUEST, exception.getErrorCode(), exception.getMessage());
     }
     @ExceptionHandler(ResourceNotFoundException.class)
     ResponseEntity<ApiError> handleNotFound(ResourceNotFoundException exception, HttpServletRequest request) {

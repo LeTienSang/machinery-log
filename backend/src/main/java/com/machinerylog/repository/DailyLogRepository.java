@@ -37,4 +37,7 @@ public interface DailyLogRepository extends JpaRepository<DailyLog, Long> {
     List<DailyLog> findApprovedByContractIdBetweenDateRange(@Param("contractId") Long contractId,
                                                             @Param("fromDate") LocalDate fromDate,
                                                             @Param("toDate") LocalDate toDate);
+
+    boolean existsByEquipmentId(Long equipmentId);
+    boolean existsByContractId(Long contractId);
 }

@@ -39,6 +39,10 @@ public class AuthService {
         return response(user);
     }
 
+    public void logout() {
+        // Stateless JWT: logout handled client-side (clear session). Server-side revocation is TODO (PLAN Giai đoạn 1).
+    }
+
     private AuthResponse response(User user) {
         return new AuthResponse(jwtService.createAccessToken(user), jwtService.createRefreshToken(user), "Bearer", jwtService.getAccessTokenSeconds());
     }

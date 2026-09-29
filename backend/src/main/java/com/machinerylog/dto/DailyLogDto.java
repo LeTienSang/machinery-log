@@ -20,7 +20,10 @@ public record DailyLogDto(
     @DecimalMin("0.0") BigDecimal operatingHours,
     @DecimalMin("0.0") BigDecimal standbyHours,
     String workDescription,
+    Long operatorId,
     String operatorName,
+    Long reviewerId,
+    String reviewerName,
     String originalImageUrl,
     ApprovalStatus approvalStatus,
     String rejectionReason

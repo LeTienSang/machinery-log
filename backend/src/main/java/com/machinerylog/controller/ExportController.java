@@ -1,5 +1,6 @@
 package com.machinerylog.controller;
 
+import com.machinerylog.api.ApiError;
 import com.machinerylog.service.ExportService;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.http.ContentDisposition;

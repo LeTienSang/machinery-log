@@ -1,6 +1,6 @@
 package com.machinerylog.controller;
 
-import com.machinerylog.dto.DailyLogDto;
+import com.machinerylog.api.ApiError;
 import com.machinerylog.entity.User;
 import com.machinerylog.service.OcrService;
 import jakarta.validation.constraints.NotNull;
@@ -22,7 +22,7 @@ public class OcrController {
 
     @PostMapping(value = "/process-log", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAnyRole('OPERATOR', 'ACCOUNTANT_ADMIN')")
-    public ResponseEntity<DailyLogDto> process(
+    public ResponseEntity<ApiError> process(
         @RequestPart("file") MultipartFile file,
         @RequestParam @NotNull Long contractId,
         @RequestParam @NotNull Long equipmentId,
@@ -30,6 +30,6 @@ public class OcrController {
         @RequestParam(required = false) Long operatorId,
         @AuthenticationPrincipal User actor
     ) {
-        return ResponseEntity.ok(ocr.process(file, contractId, equipmentId, workDate, operatorId, actor));
+        return ResponseEntity.ok(new ApiError(ocr.process(file, contractId, equipmentId, workDate, operatorId, actor), "OCR processed successfully"));
     }
 }

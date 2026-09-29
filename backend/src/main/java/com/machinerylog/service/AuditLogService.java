@@ -1,12 +1,13 @@
 package com.machinerylog.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.machinerylog.api.PageResponse;
 import com.machinerylog.api.RequestIdContext;
 import com.machinerylog.dto.AuditLogDto;
 import com.machinerylog.entity.AuditLog;
 import com.machinerylog.repository.AuditLogRepository;
+import com.machinerylog.repository.UserRepository;
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,8 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AuditLogService {
     private final AuditLogRepository audits;
+    private final UserRepository users;
 
-    public AuditLogService(AuditLogRepository audits) { this.audits = audits; }
+    public AuditLogService(AuditLogRepository audits) { this(audits, null); }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public AuditLogService(AuditLogRepository audits, UserRepository users) { this.audits = audits; this.users = users; }
 
     @Transactional
     public void record(Long actorUserId, String action, String entityType, Long entityId,
@@ -34,14 +39,21 @@ public class AuditLogService {
     }
 
     @Transactional(readOnly = true)
-    public List<AuditLogDto> search(String entityType, Long entityId, Long actorUserId,
-                                    String action, Instant fromDate, Instant toDate) {
-        return audits.search(blankToNull(entityType), entityId, actorUserId, blankToNull(action), fromDate, toDate)
-            .stream().map(this::toDto).toList();
+    public PageResponse<AuditLogDto> search(String entityType, Long entityId, Long actorUserId,
+                                    String action, Instant fromDate, Instant toDate,
+                                    org.springframework.data.domain.Pageable pageable) {
+        return PageResponse.from(audits.search(blankToNull(entityType), entityId, actorUserId, blankToNull(action), fromDate, toDate, pageable)
+            .map(this::toDto));
     }
 
     private AuditLogDto toDto(AuditLog value) {
-        return new AuditLogDto(value.getId(), value.getActorUserId(), value.getAction(), value.getEntityType(),
+        String actorUsername = null;
+        if (value.getActorUserId() != null && users != null) {
+            actorUsername = users.findById(value.getActorUserId())
+                .map(user -> user.getDisplayName() != null ? user.getDisplayName() : user.getUsername())
+                .orElse(null);
+        }
+        return new AuditLogDto(value.getId(), value.getActorUserId(), actorUsername, value.getAction(), value.getEntityType(),
             value.getEntityId(), value.getOldValues(), value.getNewValues(), value.getReason(),
             value.getRequestId(), value.getCreatedAt());
     }
