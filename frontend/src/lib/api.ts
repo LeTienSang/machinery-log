@@ -8,8 +8,14 @@ import type {
 
 // ─── Axios instance ──────────────────────────────────────────────────────────
 
+function resolveBaseUrl(): string {
+  const raw = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://localhost:8080/api/v1'
+  const trimmed = raw.replace(/\/+$/, '')
+  return trimmed.endsWith('/api/v1') ? trimmed : `${trimmed}/api/v1`
+}
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080/api/v1',
+  baseURL: resolveBaseUrl(),
 })
 
 // ─── Session helpers ─────────────────────────────────────────────────────────

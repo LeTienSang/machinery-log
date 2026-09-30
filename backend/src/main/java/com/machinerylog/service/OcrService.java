@@ -23,8 +23,7 @@ public class OcrService {
     private final DailyLogService dailyLogs;
 
     public OcrService(FileStorage storage, OcrClient ocrClient, DailyLogService dailyLogs,
-                      @org.springframework.beans.factory.annotation.Value("${machinery-log.ocr.max-image-bytes:10485760}") long maxFileSize) {
-        this.storage = storage;
+                      @org.springframework.beans.factory.annotation.Value("${machinery-log.ocr.max-image-bytes:10485760}") long maxFileSize) {        this.storage = storage;
         this.ocrClient = ocrClient;
         this.dailyLogs = dailyLogs;
         this.maxFileSize = maxFileSize;

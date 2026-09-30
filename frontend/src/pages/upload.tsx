@@ -18,7 +18,6 @@ export function UploadPage() {
   const [draft, setDraft] = useState<DailyLog | null>(null)
   const [step, setStep] = useState<'form' | 'ocr' | 'submitted'>('form')
   const [ocrLoading, setOcrLoading] = useState(false)
-  const [compressLoading, setCompressLoading] = useState(false)
   const [saveLoading, setSaveLoading] = useState(false)
 
   const { data: contractsPage } = useQuery({
@@ -40,6 +39,13 @@ export function UploadPage() {
     }
   }
 
+  function truncateFileName(name: string, maxLen = 30) {
+    if (name.length <= maxLen) return name
+    const ext = name.split('.').pop() ?? ''
+    const base = name.slice(0, maxLen - ext.length - 4)
+    return `${base}...${ext ? '.' + ext : ''}`
+  }
+
   async function handleOcr(e: FormEvent) {
     e.preventDefault()
     if (!file) return
@@ -48,6 +54,7 @@ export function UploadPage() {
       setCompressLoading(true)
       let uploadFile = file
       try {
+        setCompressLoading(true)
         uploadFile = await compressForOCR(file)
       } catch {
         toast('Không nén được ảnh, dùng ảnh gốc để gửi.', 'error')
@@ -179,7 +186,7 @@ export function UploadPage() {
                 className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 py-8 text-sm text-gray-500 hover:border-blue-400 hover:bg-blue-50"
               >
                 <FileImage size={32} className="text-gray-400" />
-                <span>{file ? file.name : '📷 Chạm để chụp / chọn ảnh'}</span>
+                <span>{file ? truncateFileName(file.name) : '📷 Chạm để chụp / chọn ảnh'}</span>
                 <span className="text-xs">JPG, PNG, HEIC — tối đa 10MB</span>
               </label>
               <input
@@ -197,7 +204,12 @@ export function UploadPage() {
               <img src={preview} alt="Preview" className="max-h-48 rounded-lg object-contain" />
             )}
 
-            <Button type="submit" size="lg" loading={ocrLoading} className="mt-2 w-full">
+            <Button
+              type="submit"
+              size="lg"
+              loading={compressLoading || ocrLoading}
+              className="mt-2 w-full"
+            >
               {compressLoading ? 'Đang nén ảnh...' : ocrLoading ? 'Đang đọc dữ liệu OCR...' : 'Đọc dữ liệu từ ảnh'}
             </Button>
           </form>
