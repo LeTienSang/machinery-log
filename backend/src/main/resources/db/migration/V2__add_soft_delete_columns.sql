@@ -10,7 +10,7 @@ ALTER TABLE monthly_acceptances ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
 
 -- Tạo bảng categories
 CREATE TABLE categories (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
     description TEXT,
     category_type VARCHAR(50) NOT NULL CHECK (category_type IN ('CUSTOMER', 'EQUIPMENT', 'CONTRACT', 'WORK_TYPE')),
@@ -19,9 +19,9 @@ CREATE TABLE categories (
 );
 
 -- Thêm foreign key category cho các bảng
-ALTER TABLE customers ADD COLUMN IF NOT EXISTS category_id INTEGER REFERENCES categories(id);
-ALTER TABLE equipment ADD COLUMN IF NOT EXISTS category_id INTEGER REFERENCES categories(id);
-ALTER TABLE contracts ADD COLUMN IF NOT EXISTS category_id INTEGER REFERENCES categories(id);
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS category_id BIGINT REFERENCES categories(id);
+ALTER TABLE equipment ADD COLUMN IF NOT EXISTS category_id BIGINT REFERENCES categories(id);
+ALTER TABLE contracts ADD COLUMN IF NOT EXISTS category_id BIGINT REFERENCES categories(id);
 
 -- Tạo index cho cột category_id
 CREATE INDEX IF NOT EXISTS idx_customers_category ON customers(category_id);

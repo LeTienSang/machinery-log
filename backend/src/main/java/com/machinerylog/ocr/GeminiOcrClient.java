@@ -77,7 +77,8 @@ public class GeminiOcrClient implements OcrClient {
 
         try {
             byte[] bytes = image.readAllBytes();
-            String prompt = "Extract this handwritten machinery log as JSON only. Fields: "
+            String prompt = "You are a specialized OCR parser for Vietnamese construction machinery logbooks "
+                + "(Nhat ky xe / may cong trinh). Return valid JSON only, no markdown, no explanation. Fields: "
                 + "morningStartTime, morningEndTime, afternoonStartTime, afternoonEndTime, "
                 + "eveningStartTime, eveningEndTime, operatingHours, standbyHours, workDescription, operatorName. "
                 + "Use null when unreadable. Times must be HH:mm.";
@@ -85,6 +86,7 @@ public class GeminiOcrClient implements OcrClient {
                 Map.of("text", prompt), Map.of("inline_data", Map.of("mime_type", contentType,
                     "data", Base64.getEncoder().encodeToString(bytes)))
             })});
+            // ponytail: systemInstruction ceiling when model supports it; upgrade prompt to versioned template file
 
             String raw = requestWithRetry(body);
             JsonNode root = mapper.readTree(raw);

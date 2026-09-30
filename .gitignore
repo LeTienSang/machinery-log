@@ -17,6 +17,12 @@ backend/target/
 !.vscode/settings.json
 *.iml
 
+# Docker
+docker-compose.yml
+backend/Dockerfile
+frontend/Dockerfile
+frontend/nginx.conf
+
 # OS
 .DS_Store
 Thumbs.db

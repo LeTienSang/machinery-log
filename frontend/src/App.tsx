@@ -45,7 +45,7 @@ function AppRoutes() {
       />
       <Route
         path="/upload"
-        element={<PrivateRoute><UploadPage /></PrivateRoute>}
+        element={<PrivateRoute requiredRole="ACCOUNTANT_ADMIN"><UploadPage /></PrivateRoute>}
       />
       <Route
         path="/review"

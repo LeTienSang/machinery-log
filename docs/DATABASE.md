@@ -124,9 +124,9 @@ customers (1) ───< (n) contracts (1) ───< (n) pricing_appendices >�
 |---|---|---|---|
 | id | SERIAL | PK | |
 | operator_id | INT | FK → users(id), nullable | Tài khoản `OPERATOR` sở hữu log |
-| contract_id | INT | FK → contracts(id) | |
-| equipment_id | INT | FK → equipment(id) | |
-| work_date | DATE | NOT NULL | Ngày làm việc |
+| contract_id | INT | FK → contracts(id), nullable (V3: upload chưa gán, bổ sung ở Review) | |
+| equipment_id | INT | FK → equipment(id), nullable (V3: upload chưa gán, bổ sung ở Review) | |
+| work_date | DATE | nullable (V3: upload chưa gán, bổ sung ở Review) | Ngày làm việc |
 | work_description | TEXT | | Mô tả công việc trong ngày |
 | morning_start_time | VARCHAR(10) | | Giờ bắt đầu ca sáng |
 | morning_end_time | VARCHAR(10) | | Giờ kết thúc ca sáng |

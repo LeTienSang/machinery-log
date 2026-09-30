@@ -1,5 +1,5 @@
 CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     username VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     display_name VARCHAR(150) NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE customers (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     company_name VARCHAR(255) NOT NULL,
     tax_code VARCHAR(50),
     representative_name VARCHAR(100),
@@ -22,7 +22,7 @@ CREATE TABLE customers (
 );
 
 CREATE TABLE equipment (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     equipment_name VARCHAR(255) NOT NULL,
     serial_registration_number VARCHAR(100) NOT NULL,
     equipment_type VARCHAR(50),
@@ -30,8 +30,8 @@ CREATE TABLE equipment (
 );
 
 CREATE TABLE contracts (
-    id SERIAL PRIMARY KEY,
-    customer_id INT NOT NULL REFERENCES customers(id),
+    id BIGSERIAL PRIMARY KEY,
+    customer_id BIGINT NOT NULL REFERENCES customers(id),
     contract_number VARCHAR(100) NOT NULL UNIQUE,
     signing_date DATE,
     project_name TEXT,
@@ -42,9 +42,9 @@ CREATE TABLE contracts (
 );
 
 CREATE TABLE pricing_appendices (
-    id SERIAL PRIMARY KEY,
-    contract_id INT NOT NULL REFERENCES contracts(id),
-    equipment_id INT NOT NULL REFERENCES equipment(id),
+    id BIGSERIAL PRIMARY KEY,
+    contract_id BIGINT NOT NULL REFERENCES contracts(id),
+    equipment_id BIGINT NOT NULL REFERENCES equipment(id),
     pricing_type VARCHAR(50) NOT NULL DEFAULT 'HOURLY',
     unit_price DECIMAL(15, 2) NOT NULL,
     unit_of_measure VARCHAR(20) NOT NULL DEFAULT 'Hours',
@@ -53,10 +53,10 @@ CREATE TABLE pricing_appendices (
 );
 
 CREATE TABLE daily_logs (
-    id SERIAL PRIMARY KEY,
-    operator_id INT REFERENCES users(id),
-    contract_id INT NOT NULL REFERENCES contracts(id),
-    equipment_id INT NOT NULL REFERENCES equipment(id),
+    id BIGSERIAL PRIMARY KEY,
+    operator_id BIGINT REFERENCES users(id),
+    contract_id BIGINT NOT NULL REFERENCES contracts(id),
+    equipment_id BIGINT NOT NULL REFERENCES equipment(id),
     work_date DATE NOT NULL,
     work_description TEXT,
     morning_start_time VARCHAR(10),
@@ -71,7 +71,7 @@ CREATE TABLE daily_logs (
     original_image_url TEXT,
     approval_status VARCHAR(50) NOT NULL DEFAULT 'PENDING',
     rejection_reason TEXT,
-    reviewer_id INT REFERENCES users(id),
+    reviewer_id BIGINT REFERENCES users(id),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT ck_daily_logs_status CHECK (approval_status IN ('PENDING', 'APPROVED', 'REJECTED')),
     CONSTRAINT ck_daily_logs_rejection_reason CHECK (
@@ -82,9 +82,9 @@ CREATE TABLE daily_logs (
 );
 
 CREATE TABLE monthly_acceptances (
-    id SERIAL PRIMARY KEY,
-    contract_id INT NOT NULL REFERENCES contracts(id),
-    equipment_id INT NOT NULL REFERENCES equipment(id),
+    id BIGSERIAL PRIMARY KEY,
+    contract_id BIGINT NOT NULL REFERENCES contracts(id),
+    equipment_id BIGINT NOT NULL REFERENCES equipment(id),
     billing_month VARCHAR(7) NOT NULL,
     from_date DATE,
     to_date DATE,
@@ -105,8 +105,8 @@ CREATE TABLE monthly_acceptances (
 );
 
 CREATE TABLE advance_payments (
-    id SERIAL PRIMARY KEY,
-    contract_id INT NOT NULL REFERENCES contracts(id),
+    id BIGSERIAL PRIMARY KEY,
+    contract_id BIGINT NOT NULL REFERENCES contracts(id),
     document_date DATE NOT NULL,
     document_number VARCHAR(100),
     description TEXT,
@@ -115,8 +115,8 @@ CREATE TABLE advance_payments (
 );
 
 CREATE TABLE debt_reconciliations (
-    id SERIAL PRIMARY KEY,
-    contract_id INT NOT NULL REFERENCES contracts(id),
+    id BIGSERIAL PRIMARY KEY,
+    contract_id BIGINT NOT NULL REFERENCES contracts(id),
     reconciliation_date DATE,
     previous_balance DECIMAL(15, 2) NOT NULL DEFAULT 0,
     current_period_acceptance DECIMAL(15, 2),
@@ -128,7 +128,7 @@ CREATE TABLE debt_reconciliations (
 
 CREATE TABLE audit_logs (
     id BIGSERIAL PRIMARY KEY,
-    actor_user_id INT REFERENCES users(id),
+    actor_user_id BIGINT REFERENCES users(id),
     action VARCHAR(50) NOT NULL,
     entity_type VARCHAR(100) NOT NULL,
     entity_id BIGINT NOT NULL,
@@ -155,9 +155,11 @@ CREATE INDEX idx_monthly_acceptances_contract_month
 
 -- The fresh-install path has no legacy rows. This gate is intentionally retained so
 -- a copied migration cannot silently accept incomplete operator ownership data.
-CREATE TEMP TABLE operator_backfill_map (
-    daily_log_id INT PRIMARY KEY REFERENCES daily_logs(id),
-    operator_id INT NOT NULL REFERENCES users(id)
+-- NOTE: plain table (not TEMP) + no FK refs: Postgres forbids temp tables
+-- referencing permanent tables (42P16). Dropped right after the check.
+CREATE TABLE IF NOT EXISTS operator_backfill_map (
+    daily_log_id BIGINT PRIMARY KEY,
+    operator_id BIGINT NOT NULL
 );
 
 UPDATE daily_logs AS dl
@@ -172,6 +174,8 @@ BEGIN
         RAISE EXCEPTION 'Backfill operator_id is incomplete';
     END IF;
 END $$;
+
+DROP TABLE IF EXISTS operator_backfill_map;
 
 -- Archive and remove duplicate acceptance rows before the unique constraint is applied.
 CREATE TABLE monthly_acceptances_dedup_archive AS

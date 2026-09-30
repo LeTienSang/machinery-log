@@ -60,10 +60,10 @@ Upload ảnh nhật ký viết tay → gọi Gemini API trích xuất dữ liệ
 **Payload:**
 | Field | Kiểu | Bắt buộc | Mô tả |
 |---|---|---|---|
-| file | File (jpg/png/heic, ≤10MB) | ✔ | Ảnh nhật ký |
-| contractId | Long | ✔ | ID hợp đồng |
-| equipmentId | Long | ✔ | ID thiết bị |
-| workDate | Date (`YYYY-MM-DD`) | ✔ | Ngày làm việc trên nhật ký |
+| file | File (jpg/png/heic, ≤10MB, client nén còn ~1MB JPEG 1920px) | ✔ | Ảnh nhật ký |
+| contractId | Long | ✘ | ID hợp đồng, bổ sung ở Review nếu thiếu |
+| equipmentId | Long | ✘ | ID thiết bị, bổ sung ở Review nếu thiếu |
+| workDate | Date (`YYYY-MM-DD`) | ✘ | Ngày làm việc, bổ sung ở Review nếu thiếu |
 | operatorId | Long | Điều kiện | Bắt buộc khi `ACCOUNTANT_ADMIN` upload thay Operator; với `OPERATOR`, backend lấy từ JWT |
 
 **Response (200):**

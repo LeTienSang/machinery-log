@@ -110,6 +110,17 @@ export async function logout(): Promise<void> {
   clearSession()
 }
 
+// ─── Envelope unwrap ─────────────────────────────────────────────────────────
+// Một số controller backend còn bọc ApiError {success,data,message}.
+// Frontend chuẩn là data trần. unwrap chịu cả 2 để nút gửi không gãy.
+function unwrap<T>(raw: unknown): T {
+  if (raw && typeof raw === 'object' && 'data' in (raw as Record<string, unknown>)) {
+    const rec = raw as Record<string, unknown>
+    if ('success' in rec || 'message' in rec || 'errorCode' in rec) return rec.data as T
+  }
+  return raw as T
+}
+
 // ─── Daily Logs ──────────────────────────────────────────────────────────────
 
 export async function getDailyLogs(params: {
@@ -145,32 +156,32 @@ export async function batchSaveDailyLogs(logs: Partial<DailyLog>[]): Promise<Dai
 }
 
 export async function processOcrLog(
-  file: File, contractId: number, equipmentId: number, workDate: string,
+  file: File, contractId?: number | null, equipmentId?: number | null, workDate?: string | null,
 ): Promise<DailyLog> {
   const form = new FormData()
   form.append('file', file)
-  form.append('contractId', String(contractId))
-  form.append('equipmentId', String(equipmentId))
-  form.append('workDate', workDate)
-  const { data } = await api.post<DailyLog>('/ocr/process-log', form)
-  return data
+  if (contractId != null && contractId !== 0) form.append('contractId', String(contractId))
+  if (equipmentId != null && equipmentId !== 0) form.append('equipmentId', String(equipmentId))
+  if (workDate) form.append('workDate', workDate)
+  const { data } = await api.post('/ocr/process-log', form)
+  return unwrap<DailyLog>(data)
 }
 
 // ─── Customers ───────────────────────────────────────────────────────────────
 
 export async function getCustomers(search?: string): Promise<PageResponse<Customer>> {
-  const { data } = await api.get<PageResponse<Customer>>('/customers', { params: { search, size: 100 } })
-  return data
+  const { data } = await api.get('/customers', { params: { search, size: 100 } })
+  return unwrap<PageResponse<Customer>>(data)
 }
 
 export async function createCustomer(body: Omit<Customer, 'id'>): Promise<Customer> {
-  const { data } = await api.post<Customer>('/customers', body)
-  return data
+  const { data } = await api.post('/customers', body)
+  return unwrap<Customer>(data)
 }
 
 export async function updateCustomer(id: number, body: Omit<Customer, 'id'>): Promise<Customer> {
-  const { data } = await api.put<Customer>(`/customers/${id}`, body)
-  return data
+  const { data } = await api.put(`/customers/${id}`, body)
+  return unwrap<Customer>(data)
 }
 
 export async function deleteCustomer(id: number): Promise<void> {
@@ -180,18 +191,18 @@ export async function deleteCustomer(id: number): Promise<void> {
 // ─── Equipment ───────────────────────────────────────────────────────────────
 
 export async function getEquipment(search?: string): Promise<PageResponse<Equipment>> {
-  const { data } = await api.get<PageResponse<Equipment>>('/equipment', { params: { search, size: 100 } })
-  return data
+  const { data } = await api.get('/equipment', { params: { search, size: 100 } })
+  return unwrap<PageResponse<Equipment>>(data)
 }
 
 export async function createEquipment(body: Omit<Equipment, 'id'>): Promise<Equipment> {
-  const { data } = await api.post<Equipment>('/equipment', body)
-  return data
+  const { data } = await api.post('/equipment', body)
+  return unwrap<Equipment>(data)
 }
 
 export async function updateEquipment(id: number, body: Omit<Equipment, 'id'>): Promise<Equipment> {
-  const { data } = await api.put<Equipment>(`/equipment/${id}`, body)
-  return data
+  const { data } = await api.put(`/equipment/${id}`, body)
+  return unwrap<Equipment>(data)
 }
 
 export async function deleteEquipment(id: number): Promise<void> {
@@ -201,40 +212,40 @@ export async function deleteEquipment(id: number): Promise<void> {
 // ─── Contracts ───────────────────────────────────────────────────────────────
 
 export async function getContracts(params?: { search?: string; customerId?: number; status?: ContractStatus }): Promise<PageResponse<Contract>> {
-  const { data } = await api.get<PageResponse<Contract>>('/contracts', { params: { size: 100, ...params } })
-  return data
+  const { data } = await api.get('/contracts', { params: { size: 100, ...params } })
+  return unwrap<PageResponse<Contract>>(data)
 }
 
 export async function getContract(id: number): Promise<Contract> {
-  const { data } = await api.get<Contract>(`/contracts/${id}`)
-  return data
+  const { data } = await api.get(`/contracts/${id}`)
+  return unwrap<Contract>(data)
 }
 
 export async function createContract(body: Omit<Contract, 'id'>): Promise<Contract> {
-  const { data } = await api.post<Contract>('/contracts', body)
-  return data
+  const { data } = await api.post('/contracts', body)
+  return unwrap<Contract>(data)
 }
 
 export async function updateContract(id: number, body: Omit<Contract, 'id'>): Promise<Contract> {
-  const { data } = await api.put<Contract>(`/contracts/${id}`, body)
-  return data
+  const { data } = await api.put(`/contracts/${id}`, body)
+  return unwrap<Contract>(data)
 }
 
 // ─── Pricing Appendices ──────────────────────────────────────────────────────
 
 export async function getPricingAppendices(contractId: number): Promise<PricingAppendix[]> {
-  const { data } = await api.get<PricingAppendix[]>(`/contracts/${contractId}/pricing-appendices`)
-  return data
+  const { data } = await api.get(`/contracts/${contractId}/pricing-appendices`)
+  return unwrap<PricingAppendix[]>(data)
 }
 
 export async function createPricingAppendix(contractId: number, body: Omit<PricingAppendix, 'id' | 'contractId'>): Promise<PricingAppendix> {
-  const { data } = await api.post<PricingAppendix>(`/contracts/${contractId}/pricing-appendices`, { ...body, contractId })
-  return data
+  const { data } = await api.post(`/contracts/${contractId}/pricing-appendices`, { ...body, contractId })
+  return unwrap<PricingAppendix>(data)
 }
 
 export async function updatePricingAppendix(id: number, body: Omit<PricingAppendix, 'id'>): Promise<PricingAppendix> {
-  const { data } = await api.put<PricingAppendix>(`/pricing-appendices/${id}`, body)
-  return data
+  const { data } = await api.put(`/pricing-appendices/${id}`, body)
+  return unwrap<PricingAppendix>(data)
 }
 
 export async function deletePricingAppendix(id: number): Promise<void> {
@@ -244,25 +255,25 @@ export async function deletePricingAppendix(id: number): Promise<void> {
 // ─── Monthly Acceptances ─────────────────────────────────────────────────────
 
 export async function getMonthlyAcceptances(contractId: number, month: string): Promise<MonthlyAcceptance[]> {
-  const { data } = await api.get<MonthlyAcceptance[]>('/monthly-acceptances', { params: { contractId, month } })
-  return data
+  const { data } = await api.get('/monthly-acceptances', { params: { contractId, month } })
+  return unwrap<MonthlyAcceptance[]>(data)
 }
 
 export async function signAcceptance(id: number): Promise<MonthlyAcceptance> {
-  const { data } = await api.put<MonthlyAcceptance>(`/monthly-acceptances/${id}/sign`)
-  return data
+  const { data } = await api.put(`/monthly-acceptances/${id}/sign`)
+  return unwrap<MonthlyAcceptance>(data)
 }
 
 // ─── Advance Payments ────────────────────────────────────────────────────────
 
 export async function getAdvancePayments(contractId: number): Promise<AdvancePayment[]> {
-  const { data } = await api.get<AdvancePayment[]>(`/contracts/${contractId}/advance-payments`)
-  return data
+  const { data } = await api.get(`/contracts/${contractId}/advance-payments`)
+  return unwrap<AdvancePayment[]>(data)
 }
 
 export async function createAdvancePayment(contractId: number, body: Omit<AdvancePayment, 'id' | 'contractId'>): Promise<AdvancePayment> {
-  const { data } = await api.post<AdvancePayment>(`/contracts/${contractId}/advance-payments`, body)
-  return data
+  const { data } = await api.post(`/contracts/${contractId}/advance-payments`, body)
+  return unwrap<AdvancePayment>(data)
 }
 
 export async function deleteAdvancePayment(id: number): Promise<void> {
@@ -272,18 +283,18 @@ export async function deleteAdvancePayment(id: number): Promise<void> {
 // ─── Debt Reconciliation ─────────────────────────────────────────────────────
 
 export async function getDebtReconciliations(contractId: number): Promise<DebtReconciliation[]> {
-  const { data } = await api.get<DebtReconciliation[]>(`/contracts/${contractId}/debt-reconciliations`)
-  return data
+  const { data } = await api.get(`/contracts/${contractId}/debt-reconciliations`)
+  return unwrap<DebtReconciliation[]>(data)
 }
 
 export async function createDebtReconciliation(contractId: number, month: string): Promise<DebtReconciliation> {
-  const { data } = await api.post<DebtReconciliation>(`/contracts/${contractId}/debt-reconciliations`, { month })
-  return data
+  const { data } = await api.post(`/contracts/${contractId}/debt-reconciliations`, { month })
+  return unwrap<DebtReconciliation>(data)
 }
 
 export async function reconcileDebt(id: number): Promise<DebtReconciliation> {
-  const { data } = await api.put<DebtReconciliation>(`/debt-reconciliations/${id}/status`, { status: 'RECONCILED' })
-  return data
+  const { data } = await api.put(`/debt-reconciliations/${id}/status`, { status: 'RECONCILED' })
+  return unwrap<DebtReconciliation>(data)
 }
 
 // ─── Export ──────────────────────────────────────────────────────────────────
@@ -315,8 +326,8 @@ export async function getAuditLogs(params?: {
   page?: number
   size?: number
 }): Promise<PageResponse<AuditLog>> {
-  const { data } = await api.get<PageResponse<AuditLog>>('/audit-logs', { params: { size: 50, page: 0, ...params } })
-  return data
+  const { data } = await api.get('/audit-logs', { params: { size: 50, page: 0, ...params } })
+  return unwrap<PageResponse<AuditLog>>(data)
 }
 
 // ─── Health Check ───────────────────────────────────────────────────────────────

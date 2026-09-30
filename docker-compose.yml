@@ -1,6 +1,7 @@
 services:
   postgres:
-    image: postgres:16-alpine
+    image: postgres:15-alpine
+    container_name: machinery-log-postgres
     environment:
       POSTGRES_DB: machinery_log_db
       POSTGRES_USER: machinery_log
@@ -8,10 +9,12 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
 
   minio:
-    image: minio/minio:latest
+    image: quay.io/minio/aistor/minio:RELEASE.2026-09-19T17-05-25Z
+    container_name: machinery-log-minio
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: machinery-log
@@ -20,8 +23,57 @@ services:
       - "9000:9000"
       - "9001:9001"
     volumes:
-      - minio-data:/data
+      - minio_data:/data
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: machinery-log-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/machinery_log_db
+      SPRING_DATASOURCE_USERNAME: machinery_log
+      SPRING_DATASOURCE_PASSWORD: machinery_log
+      SPRING_JPA_DDL_AUTO: validate
+      SPRING_FLYWAY_ENABLED: true
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set, at least 32 chars}
+      JWT_ACCESS_TOKEN_MINUTES: 120
+      JWT_REFRESH_TOKEN_DAYS: 7
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:3000,http://localhost:5173}
+      DEV_OPERATOR_PASSWORD: ${DEV_OPERATOR_PASSWORD:-operator-local-change-me}
+      DEV_ACCOUNTANT_PASSWORD: ${DEV_ACCOUNTANT_PASSWORD:-accountant-local-change-me}
+      FILE_STORAGE_ENDPOINT: http://minio:9000
+      FILE_STORAGE_ACCESS_KEY: machinery-log
+      FILE_STORAGE_SECRET_KEY: machinery-log-local
+      FILE_STORAGE_BUCKET: machinery-log-images
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_TIMEOUT_MS: 30000
+      GEMINI_MAX_ATTEMPTS: 3
+      GEMINI_INITIAL_BACKOFF_MS: 1000
+      GEMINI_BACKOFF_MULTIPLIER: 2.0
+      GEMINI_MAX_REQUESTS_PER_MINUTE: 15
+      GEMINI_ENABLE_FALLBACK: true
+    depends_on:
+      - postgres
+      - minio
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: machinery-log-frontend
+    ports:
+      - "3000:80"
+    environment:
+      VITE_API_BASE_URL: http://localhost:8080
+    depends_on:
+      - backend
+    restart: unless-stopped
 
 volumes:
-  postgres-data:
-  minio-data:
+  postgres_data:
+  minio_data:

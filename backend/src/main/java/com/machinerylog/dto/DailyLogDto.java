@@ -2,15 +2,14 @@ package com.machinerylog.dto;
 
 import com.machinerylog.entity.ApprovalStatus;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record DailyLogDto(
     Long id,
-    @NotNull Long contractId,
-    @NotNull Long equipmentId,
-    @NotNull LocalDate workDate,
+    Long contractId,
+    Long equipmentId,
+    LocalDate workDate,
     String morningStartTime,
     String morningEndTime,
     String afternoonStartTime,

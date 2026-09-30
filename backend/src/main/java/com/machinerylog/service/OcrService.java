@@ -36,9 +36,11 @@ public class OcrService {
         Long operatorId = actor.getRole().name().equals("OPERATOR") ? actor.getId() : requestedOperatorId;
         if (operatorId == null) throw new IllegalArgumentException("operatorId is required for accountant uploads");
         try {
+            // ponytail: in-memory stream only, no disk/db persistence; add virus-scan ceiling when public upload opens
             byte[] bytes = file.getBytes();
             String extension = extension(file.getContentType());
-            String objectName = "daily-logs/" + contractId + "/" + UUID.randomUUID() + extension;
+            String prefix = (contractId == null ? "unassigned" : String.valueOf(contractId));
+            String objectName = "daily-logs/" + prefix + "/" + UUID.randomUUID() + extension;
             String imageUrl = storage.store(objectName, new ByteArrayInputStream(bytes), bytes.length, file.getContentType());
             var result = ocrClient.process(new ByteArrayInputStream(bytes), file.getContentType(), bytes.length);
             return dailyLogs.createFromOcr(contractId, equipmentId, workDate, operatorId, imageUrl, result);

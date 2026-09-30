@@ -60,7 +60,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource(@Value("${machinery-log.cors.allowed-origin}") String origin) {
         var configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(java.util.List.of(origin));
+        configuration.setAllowedOriginPatterns(java.util.Arrays.stream(origin.split(",")).map(String::trim).toList());
         configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(java.util.List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);

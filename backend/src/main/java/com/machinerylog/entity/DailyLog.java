@@ -14,13 +14,13 @@ public class DailyLog {
     @Column(name = "operator_id")
     private Long operatorId;
 
-    @Column(name = "contract_id", nullable = false)
+    @Column(name = "contract_id")
     private Long contractId;
 
-    @Column(name = "equipment_id", nullable = false)
+    @Column(name = "equipment_id")
     private Long equipmentId;
 
-    @Column(name = "work_date", nullable = false)
+    @Column(name = "work_date")
     private LocalDate workDate;
 
     @Column(name = "work_description")

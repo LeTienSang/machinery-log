@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Upload, FileImage } from 'lucide-react'
 import { processOcrLog, batchSaveDailyLogs, getContracts, getEquipment } from '@/lib/api'
+import { compressForOCR } from '@/utils/compressImage'
 import { useToast } from '@/components/ui/toast'
 import { Button, Input, Select, FormField, Textarea, Card } from '@/components/ui/primitives'
 import { AppShell, PageHeader } from '@/components/layout/app-shell'
@@ -17,6 +18,7 @@ export function UploadPage() {
   const [draft, setDraft] = useState<DailyLog | null>(null)
   const [step, setStep] = useState<'form' | 'ocr' | 'submitted'>('form')
   const [ocrLoading, setOcrLoading] = useState(false)
+  const [compressLoading, setCompressLoading] = useState(false)
   const [saveLoading, setSaveLoading] = useState(false)
 
   const { data: contractsPage } = useQuery({
@@ -40,10 +42,24 @@ export function UploadPage() {
 
   async function handleOcr(e: FormEvent) {
     e.preventDefault()
-    if (!file || !contractId || !equipmentId) return
+    if (!file) return
     setOcrLoading(true)
     try {
-      const result = await processOcrLog(file, Number(contractId), Number(equipmentId), workDate)
+      setCompressLoading(true)
+      let uploadFile = file
+      try {
+        uploadFile = await compressForOCR(file)
+      } catch {
+        toast('Không nén được ảnh, dùng ảnh gốc để gửi.', 'error')
+      } finally {
+        setCompressLoading(false)
+      }
+      const result = await processOcrLog(
+        uploadFile,
+        contractId ? Number(contractId) : null,
+        equipmentId ? Number(equipmentId) : null,
+        workDate || null,
+      )
       setDraft(result)
       setStep('ocr')
       toast('OCR hoàn tất. Kiểm tra và chỉnh sửa dữ liệu trước khi gửi.', 'success')
@@ -118,12 +134,11 @@ export function UploadPage() {
             <h2 className="mt-1 text-base font-semibold text-gray-900">Chọn ảnh và thông tin</h2>
           </div>
           <form onSubmit={(e) => void handleOcr(e)} className="flex flex-col gap-4 p-6">
-            <FormField label="Hợp đồng" htmlFor="contract-id" required>
+            <FormField label="Hợp đồng (không bắt buộc)" htmlFor="contract-id">
               <Select
                 id="contract-id"
                 value={contractId}
                 onChange={(e) => setContractId(e.target.value)}
-                required
               >
                 <option value="">— Chọn hợp đồng —</option>
                 {contractsPage?.content.map((c) => (
@@ -134,12 +149,11 @@ export function UploadPage() {
               </Select>
             </FormField>
 
-            <FormField label="Thiết bị" htmlFor="equipment-id" required>
+            <FormField label="Thiết bị (không bắt buộc)" htmlFor="equipment-id">
               <Select
                 id="equipment-id"
                 value={equipmentId}
                 onChange={(e) => setEquipmentId(e.target.value)}
-                required
               >
                 <option value="">— Chọn thiết bị —</option>
                 {equipmentPage?.content.map((eq) => (
@@ -150,13 +164,12 @@ export function UploadPage() {
               </Select>
             </FormField>
 
-            <FormField label="Ngày làm việc" htmlFor="work-date" required>
+            <FormField label="Ngày làm việc (không bắt buộc)" htmlFor="work-date">
               <Input
                 id="work-date"
                 type="date"
                 value={workDate}
                 onChange={(e) => setWorkDate(e.target.value)}
-                required
               />
             </FormField>
 
@@ -185,7 +198,7 @@ export function UploadPage() {
             )}
 
             <Button type="submit" size="lg" loading={ocrLoading} className="mt-2 w-full">
-              {ocrLoading ? 'Đang đọc dữ liệu OCR...' : 'Đọc dữ liệu từ ảnh'}
+              {compressLoading ? 'Đang nén ảnh...' : ocrLoading ? 'Đang đọc dữ liệu OCR...' : 'Đọc dữ liệu từ ảnh'}
             </Button>
           </form>
         </Card>

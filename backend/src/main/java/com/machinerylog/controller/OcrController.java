@@ -3,7 +3,6 @@ package com.machinerylog.controller;
 import com.machinerylog.api.ApiError;
 import com.machinerylog.entity.User;
 import com.machinerylog.service.OcrService;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
@@ -24,9 +23,9 @@ public class OcrController {
     @PreAuthorize("hasAnyRole('OPERATOR', 'ACCOUNTANT_ADMIN')")
     public ResponseEntity<ApiError> process(
         @RequestPart("file") MultipartFile file,
-        @RequestParam @NotNull Long contractId,
-        @RequestParam @NotNull Long equipmentId,
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate workDate,
+        @RequestParam(required = false) Long contractId,
+        @RequestParam(required = false) Long equipmentId,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate workDate,
         @RequestParam(required = false) Long operatorId,
         @AuthenticationPrincipal User actor
     ) {

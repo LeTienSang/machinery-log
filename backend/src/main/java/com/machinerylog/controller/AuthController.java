@@ -1,6 +1,5 @@
 package com.machinerylog.controller;
 
-import com.machinerylog.api.ApiError;
 import com.machinerylog.dto.AuthRequest;
 import com.machinerylog.dto.AuthResponse;
 import com.machinerylog.dto.RefreshRequest;
@@ -18,15 +17,13 @@ public class AuthController {
     public AuthController(AuthService authService) { this.authService = authService; }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiError> login(@Valid @RequestBody AuthRequest request) {
-        AuthResponse response = authService.login(request);
-        return ResponseEntity.ok(new ApiError(response, "Login successful"));
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<ApiError> refresh(@Valid @RequestBody RefreshRequest request) {
-        AuthResponse response = authService.refresh(request);
-        return ResponseEntity.ok(new ApiError(response, "Token refreshed"));
+    public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshRequest request) {
+        return ResponseEntity.ok(authService.refresh(request));
     }
 
     @PostMapping("/logout")

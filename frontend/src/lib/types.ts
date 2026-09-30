@@ -52,9 +52,9 @@ export type ApprovalStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
 
 export type DailyLog = {
   id: number
-  contractId: number
-  equipmentId: number
-  workDate: string
+  contractId?: number | null
+  equipmentId?: number | null
+  workDate?: string | null
   morningStartTime?: string
   morningEndTime?: string
   afternoonStartTime?: string

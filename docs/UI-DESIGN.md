@@ -95,7 +95,7 @@ Theme sáng duy nhất (v1 không có dark mode).
 └───────────────┴───────────────────────────────────────────────┘
 ```
 
-- **Sidebar:** cố định bên trái trên desktop (≥1024px), thu gọn thành bottom-nav hoặc menu hamburger trên mobile/tablet (Operator dùng ngoài công trường chủ yếu qua điện thoại).
+- **Sidebar:** cố định bên trái trên desktop (≥1024px), có nút thu gọn/mở rộng trên desktop, thu gọn thành bottom-nav hoặc menu hamburger trên mobile/tablet (Operator dùng ngoài công trường chủ yếu qua điện thoại).
 - **Topbar:** luôn hiển thị tên người dùng + vai trò (Operator/Accountant) để tránh nhầm lẫn quyền hạn.
 - **Nội dung chính:** luôn có tiêu đề trang rõ ràng (H1) + breadcrumb khi vào sâu (VD: Hợp đồng → HD-001 → Phụ lục đơn giá).
 - **Responsive breakpoint:** Mobile `<768px` (Operator ngoài công trường), Tablet `768–1024px`, Desktop `≥1024px` (Accountant văn phòng).
@@ -114,13 +114,14 @@ Theme sáng duy nhất (v1 không có dark mode).
 ┌──────────────────────────────────┐
 │  ← Upload nhật ký hôm nay          │
 ├──────────────────────────────────┤
-│  Hợp đồng:      [Dropdown ▾]      │
-│  Thiết bị:      [Dropdown ▾]      │
-│  Ngày làm việc: [Date picker]     │
+│  Hợp đồng (không bắt buộc): [Dropdown ▾]│
+│  Thiết bị (không bắt buộc): [Dropdown ▾]│
+│  Ngày làm việc (không bắt buộc): [Date] │
+│  (bổ sung ở Review nếu thiếu)      │
 │                                    │
 │  ┌──────────────────────────┐     │
 │  │   📷 Chạm để chụp/chọn ảnh │     │
-│  │      (kéo thả trên desktop)│    │
+│  │   (tự nén còn ~1MB JPEG)  │     │
 │  └──────────────────────────┘     │
 │  [Preview ảnh đã chọn]             │
 │                                    │
