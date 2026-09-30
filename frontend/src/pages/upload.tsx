@@ -18,6 +18,7 @@ export function UploadPage() {
   const [draft, setDraft] = useState<DailyLog | null>(null)
   const [step, setStep] = useState<'form' | 'ocr' | 'submitted'>('form')
   const [ocrLoading, setOcrLoading] = useState(false)
+  const [compressLoading, setCompressLoading] = useState(false)
   const [saveLoading, setSaveLoading] = useState(false)
 
   const { data: contractsPage } = useQuery({
@@ -54,7 +55,10 @@ export function UploadPage() {
       setCompressLoading(true)
       let uploadFile = file
       try {
+<<<<<<< HEAD
         setCompressLoading(true)
+=======
+>>>>>>> 94a18b3 (fix operator UI)
         uploadFile = await compressForOCR(file)
       } catch {
         toast('Không nén được ảnh, dùng ảnh gốc để gửi.', 'error')
@@ -204,12 +208,16 @@ export function UploadPage() {
               <img src={preview} alt="Preview" className="max-h-48 rounded-lg object-contain" />
             )}
 
+<<<<<<< HEAD
             <Button
               type="submit"
               size="lg"
               loading={compressLoading || ocrLoading}
               className="mt-2 w-full"
             >
+=======
+            <Button type="submit" size="lg" loading={ocrLoading} className="mt-2 w-full">
+>>>>>>> 94a18b3 (fix operator UI)
               {compressLoading ? 'Đang nén ảnh...' : ocrLoading ? 'Đang đọc dữ liệu OCR...' : 'Đọc dữ liệu từ ảnh'}
             </Button>
           </form>
