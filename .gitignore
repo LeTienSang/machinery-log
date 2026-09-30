@@ -20,4 +20,5 @@ backend/target/
 # OS
 .DS_Store
 Thumbs.db
-.aider*
+opencode.md
+opencode.json

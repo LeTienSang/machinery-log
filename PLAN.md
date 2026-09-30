@@ -1,20 +1,24 @@
 ﻿# Kế hoạch triển khai MACHINERY-LOG
 
-> Cập nhật: 2026-09-29
+> Cập nhật: 2026-09-30
 
-> Gần đây nhất: Fix auth flow (/me endpoint, envelope sync, logout state clear).
+> Gần đây nhất: Hoàn thiện chuẩn hóa API response (bỏ ApiError wrapper) và bổ sung health check endpoint.
 
 > Trạng thái được đối chiếu với mã nguồn hiện tại, không đánh dấu `DONE` chỉ dựa
 > trên tài liệu thiết kế. `DONE` nghĩa là đã có bằng chứng trong repository và
 > đã kiểm tra được ở mức phù hợp. Lưu ý cần cập nhật file này liên tục
 
-## 0. Gần đây nhất (2026-09-29)
+## 0. Gần đây nhất (2026-09-30)
 
 - [x] **DONE** — Bổ sung health check endpoint `/api/v1/health`.
   - Backend: `HealthController`, `HealthService`, `HealthCheckResult`, `HealthStatus`.
   - Backend: check database connectivity, trả 200 khi OK, 503 khi fail.
   - Frontend: `getHealth()` API client, `HealthCheckResult` type.
   - Test: `HealthControllerTest` integration test.
+- [x] **DONE** — Chuẩn hóa API response: bỏ `ApiError` wrapper trên `DailyLogController`.
+  - `GET /api/v1/daily-logs` trả `Page<DailyLogDto>` trực tiếp (Spring Data pagination metadata).
+  - `POST /api/v1/daily-logs/batch-save` trả `List<DailyLogDto>` trực tiếp.
+  - `GET /api/v1/daily-logs/{id}`, `PUT/{id}/approve`, `POST/{id}/reopen` trả `DailyLogDto` trực tiếp.
 - [x] **DONE** — Fix auth flow: missing `/me` endpoint, envelope mismatch, stale state logout.
   - Backend: thêm `GET /api/v1/auth/me` trả `UserDto` (id, username, displayName, role, isActive).
   - Backend: `AuthService.me()` đọc user từ Spring Security context.
@@ -38,7 +42,10 @@
 ## 2. Giai đoạn 0 — Chuẩn bị nền tảng
 
 - [x] **DONE** — Chốt cấu trúc package theo Controller → Service → Repository → Entity/DTO.
-- [ ] **IN PROGRESS** — Chuẩn hóa error response, validation, pagination, timezone và định dạng ngày theo `API_SPEC.md` (đã có error envelope, validation handler, `PageResponse` và UTC; còn cần áp dụng vào các endpoint nghiệp vụ).
+- [x] **DONE** — Chuẩn hóa error response, validation, pagination, timezone và định dạng ngày theo `API_SPEC.md`.
+  - `/api/v1/health`: trả trực tiếp `HealthCheckResult` (không wrapping envelope).
+  - `/api/v1/daily-logs`: bỏ `ApiError` wrapper — trả `Page<DailyLogDto>`, `List<DailyLogDto>`, `DailyLogDto` trực tiếp.
+  - Frontend types: `HealthCheckResult`, `HealthStatus`, `PageResponse` đã khớp backend response.
 - [x] **DONE** — Hoàn thiện quản lý secret: bỏ giá trị mặc định nguy hiểm và kiểm tra JWT secret/thời hạn khi khởi động.
 - [x] **DONE** — Thiết lập request ID (`X-Request-Id`) và global exception handler; logging/correlation nâng cao vẫn còn ở bước sau.
 - [ ] **IN PROGRESS** — Bổ sung test framework, test fixtures và CI chạy backend/frontend build + test (đã có unit test nền tảng và workflow CI; còn thiếu fixture/integration test).

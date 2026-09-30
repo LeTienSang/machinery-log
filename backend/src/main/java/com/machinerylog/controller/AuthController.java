@@ -30,9 +30,9 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiError> logout() {
+    public ResponseEntity<Void> logout() {
         authService.logout();
-        return ResponseEntity.ok(new ApiError(null, "Logout successful"));
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/me")

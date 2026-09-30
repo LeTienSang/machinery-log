@@ -18,7 +18,7 @@
 |---|---|---|---|---|
 | POST | `/api/v1/auth/login` | Đăng nhập, trả về access token + refresh token | `{ "username": "", "password": "" }` | AuthResponse |
 | POST | `/api/v1/auth/refresh` | Làm mới access token | `{ "refreshToken": "" }` | AuthResponse |
-| POST | `/api/v1/auth/logout` | Thu hồi refresh token hiện tại | — (Bearer token) | `200 OK` |
+| POST | `/api/v1/auth/logout` | Thu hồi refresh token hiện tại | — (Bearer token) | `204 No Content` |
 | GET | `/api/v1/auth/me` | Lấy thông tin user hiện tại | — (Bearer token) | UserDto |
 
 AuthResponse:
